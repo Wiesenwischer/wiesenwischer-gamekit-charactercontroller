@@ -91,11 +91,11 @@ Implementierungs-Checkliste basierend auf [IMPLEMENTATION_PLAN.md](IMPLEMENTATIO
 ## Phase 4: Integration
 
 ### Commit 10: PlayerController MonoBehaviour
-- [ ] PlayerController.cs Haupt-Klasse
-- [ ] Subsystem-Integration (Input, Movement, StateMachine)
-- [ ] Component-Referenzen (CharacterController)
-- [ ] Config-Referenz (MovementConfig)
-- [ ] Update-Loop Struktur
+- [x] PlayerController.cs Haupt-Klasse
+- [x] Subsystem-Integration (Input, Movement, StateMachine)
+- [x] Component-Referenzen (CharacterController)
+- [x] Config-Referenz (MovementConfig)
+- [x] Update-Loop Struktur
 
 ### Commit 11: CSP Strukturen
 - [ ] ControllerInput.cs Struct (serialisierbar)
