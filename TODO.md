@@ -52,11 +52,13 @@ Implementierungs-Checkliste basierend auf [IMPLEMENTATION_PLAN.md](IMPLEMENTATIO
 - [x] AIInputProvider.cs für Tests/KI
 
 ### Commit 6: Ground Detection System
-- [ ] GroundingDetection.cs Klasse
-- [ ] Raycast-basierte Ground Check
-- [ ] SphereCast für stabilere Detection
-- [ ] Slope-Handling mit Max-Angle
-- [ ] Layer-Mask Filterung
+- [x] GroundingDetection.cs Klasse
+- [x] Raycast-basierte Ground Check (Multi-Raycast)
+- [x] SphereCast für stabilere Detection
+- [x] Slope-Handling mit Max-Angle und IsWalkable
+- [x] Layer-Mask Filterung
+- [x] Step Detection für Treppen
+- [x] Debug Gizmos
 
 ### Commit 7: Movement Simulator
 - [ ] MovementSimulator.cs Klasse
