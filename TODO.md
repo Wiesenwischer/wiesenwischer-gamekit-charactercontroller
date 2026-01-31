@@ -146,21 +146,21 @@ Implementierungs-Checkliste basierend auf [IMPLEMENTATION_PLAN.md](IMPLEMENTATIO
 ## Phase 6: Demo & Samples
 
 ### Commit 17: Demo-Szene
-- [ ] MovementTest.unity Szene erstellen
-- [ ] Ground Plane (100x100)
-- [ ] Obstacles (Cubes, Slopes, Stairs)
-- [ ] Lighting Setup (Directional Light, Skybox)
-- [ ] Optional: Debug UI Canvas
+- [x] MovementTest.unity Szene erstellen (via Editor Tool)
+- [x] Ground Plane (100x100)
+- [x] Obstacles (Cubes, Slopes, Stairs)
+- [x] Lighting Setup (Directional Light, Skybox)
+- [x] Optional: Debug UI Canvas
 
 ### Commit 18: Core Prefabs
-- [ ] BasicPlayer.prefab
-  - [ ] PlayerController Component
-  - [ ] CharacterController Component
-  - [ ] Visual (Capsule Mesh)
-  - [ ] GroundCheck Transform
-- [ ] TestGround.prefab (100x100 Plane)
-- [ ] TestSlope.prefab (verschiedene Winkel)
-- [ ] TestStairs.prefab
+- [x] BasicPlayer.prefab (via Editor Tool)
+  - [x] PlayerController Component
+  - [x] CharacterController Component
+  - [x] Visual (Capsule Mesh)
+  - [x] GroundCheck Transform
+- [x] TestGround.prefab (100x100 Plane)
+- [x] TestSlope.prefab (verschiedene Winkel)
+- [x] TestStairs.prefab
 
 ---
 
