@@ -12,18 +12,18 @@ Implementierungs-Checkliste basierend auf [IMPLEMENTATION_PLAN.md](IMPLEMENTATIO
 ## Phase 1: Projekt-Setup & Grundlagen
 
 ### Commit 1: Unity-Projekt und Package-Struktur
-- [ ] Unity 2022.3 LTS Projekt erstellen
-- [ ] Assets-Ordner mit Unterordnern
-- [ ] Packages-Ordner erstellen
-- [ ] Core-Package-Struktur (Runtime/Editor/Tests/Samples~)
-- [ ] ProjectSettings initialisieren
+- [x] Unity 2022.3 LTS Projekt erstellen
+- [x] Assets-Ordner mit Unterordnern
+- [x] Packages-Ordner erstellen
+- [x] Core-Package-Struktur (Runtime/Editor/Tests/Samples~)
+- [x] ProjectSettings initialisieren
 
 ### Commit 2: Package Metadata und Dependencies
-- [ ] package.json für Core-Package
-- [ ] Runtime Assembly Definition (.asmdef)
-- [ ] Editor Assembly Definition (.asmdef)
-- [ ] Test Assembly Definitions (Runtime/Editor)
-- [ ] manifest.json mit Unity Package Dependencies
+- [x] package.json für Core-Package
+- [x] Runtime Assembly Definition (.asmdef)
+- [x] Editor Assembly Definition (.asmdef)
+- [x] Test Assembly Definitions (Runtime/Editor)
+- [x] manifest.json mit Unity Package Dependencies (Cinemachine hinzugefügt)
 
 ### Commit 3: Core-Interfaces
 - [ ] ICharacterState.cs - State Machine Interface

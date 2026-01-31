@@ -1,0 +1,32 @@
+{
+  "name": "wiesenwischer.gamekit.charactercontroller.core",
+  "displayName": "GameKit Character Controller Core",
+  "version": "0.1.0",
+  "unity": "2022.3",
+  "description": "Modularer Third-Person Character Controller mit State Machine, deterministischer Movement-Logik und CSP-Vorbereitung für MMO-Spiele.",
+  "keywords": [
+    "character",
+    "controller",
+    "movement",
+    "state-machine",
+    "mmo",
+    "prediction",
+    "third-person"
+  ],
+  "author": {
+    "name": "Wiesenwischer",
+    "url": "https://github.com/Wiesenwischer"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Wiesenwischer/wiesenwischer-gamekit-charactercontroller.git"
+  },
+  "dependencies": {},
+  "samples": [
+    {
+      "displayName": "Basic Movement Demo",
+      "description": "Einfache Demo-Szene mit Spieler-Bewegung",
+      "path": "Samples~/BasicMovement"
+    }
+  ]
+}
