@@ -1,9 +1,12 @@
 name: Version & Release
 
 on:
+  # Manuell auslösbar
+  workflow_dispatch:
+  # Bei Tags (z.B. v1.0.0)
   push:
-    branches:
-      - main
+    tags:
+      - 'v*'
 
 jobs:
   release:
