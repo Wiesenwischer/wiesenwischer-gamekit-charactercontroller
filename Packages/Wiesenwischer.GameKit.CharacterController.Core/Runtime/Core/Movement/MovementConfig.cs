@@ -75,6 +75,10 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.Movement
         [Tooltip("Minimale Stufentiefe für Step-Up (m)")]
         [SerializeField] private float _minStepDepth = 0.1f;
 
+        [Header("Slope Sliding")]
+        [Tooltip("Geschwindigkeit beim Rutschen auf zu steilen Oberflächen (m/s)")]
+        [SerializeField] private float _slopeSlideSpeed = 8.0f;
+
         // Interface Implementation
         public float WalkSpeed => _walkSpeed;
         public float RunSpeed => _runSpeed;
@@ -95,6 +99,7 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.Movement
         public bool RotateTowardsMovement => _rotateTowardsMovement;
         public float MaxStepHeight => _maxStepHeight;
         public float MinStepDepth => _minStepDepth;
+        public float SlopeSlideSpeed => _slopeSlideSpeed;
 
         /// <summary>
         /// Berechnet die initiale Sprunggeschwindigkeit basierend auf Sprunghöhe und -dauer.

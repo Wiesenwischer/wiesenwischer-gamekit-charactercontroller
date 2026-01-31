@@ -94,6 +94,43 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.Movement
                 // Behalte die Magnitude
                 moveDirection = moveDirection.normalized * _horizontalVelocity.magnitude;
             }
+            // Slope Sliding: Rutschen wenn auf zu steilem Hang
+            else if (_isGrounded && !_groundingDetection.GroundInfo.IsWalkable)
+            {
+                // Berechne Rutschrichtung entlang des Hangs nach unten
+                Vector3 slopeNormal = _groundingDetection.GroundInfo.Normal;
+                Vector3 slideDirection = Vector3.ProjectOnPlane(Vector3.down, slopeNormal).normalized;
+
+                // Rutschgeschwindigkeit skaliert mit Hangwinkel
+                float slopeAngle = _groundingDetection.GroundInfo.SlopeAngle;
+                float slideIntensity = Mathf.InverseLerp(_config.MaxSlopeAngle, 90f, slopeAngle);
+                float slideSpeed = _config.SlopeSlideSpeed * slideIntensity;
+
+                // Setze horizontale Geschwindigkeit auf Rutschrichtung
+                moveDirection = slideDirection * slideSpeed;
+                _horizontalVelocity = moveDirection;
+
+                // Spieler kann leicht in Querrichtung steuern, aber nicht bergauf
+                if (input.MoveDirection.sqrMagnitude > 0.01f)
+                {
+                    Vector3 inputDir = new Vector3(input.MoveDirection.x, 0, input.MoveDirection.y);
+                    if (input.LookDirection.sqrMagnitude > 0.01f)
+                    {
+                        Quaternion lookRotation = Quaternion.LookRotation(
+                            new Vector3(input.LookDirection.x, 0, input.LookDirection.z).normalized,
+                            Vector3.up
+                        );
+                        inputDir = lookRotation * inputDir;
+                    }
+
+                    // Erlaube nur Bewegung, die nicht bergauf geht
+                    float upwardComponent = Vector3.Dot(inputDir.normalized, -slideDirection);
+                    if (upwardComponent < 0.5f)
+                    {
+                        moveDirection += inputDir * _config.AirControl;
+                    }
+                }
+            }
 
             // 5. Step Detection und Handling
             if (_isGrounded && moveDirection.sqrMagnitude > 0.01f)

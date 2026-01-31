@@ -123,5 +123,8 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.StateMachine
         // Step Detection
         float MaxStepHeight { get; }
         float MinStepDepth { get; }
+
+        // Slope Sliding
+        float SlopeSlideSpeed { get; }
     }
 }
