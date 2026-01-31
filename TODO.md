@@ -73,11 +73,11 @@ Implementierungs-Checkliste basierend auf [IMPLEMENTATION_PLAN.md](IMPLEMENTATIO
 ## Phase 3: State Machine
 
 ### Commit 8: State Machine Framework
-- [ ] CharacterStateMachine.cs
-- [ ] State Registration System
-- [ ] State Transition Logik
-- [ ] Current State Tracking
-- [ ] State-History für Debugging
+- [x] CharacterStateMachine.cs
+- [x] State Registration System
+- [x] State Transition Logik
+- [x] Current State Tracking
+- [x] State-History für Debugging
 
 ### Commit 9: Character States
 - [ ] GroundedState.cs Implementation
