@@ -123,11 +123,11 @@ Implementierungs-Checkliste basierend auf [IMPLEMENTATION_PLAN.md](IMPLEMENTATIO
 ## Phase 5: Editor & Testing
 
 ### Commit 14: Editor Tools
-- [ ] PlayerController Custom Inspector
-- [ ] Debug-Info Anzeige (Current State, Velocity)
-- [ ] MovementConfig Custom Editor (optional)
-- [ ] Gizmos für Ground Check Raycast
-- [ ] Gizmos für Movement Direction
+- [x] PlayerController Custom Inspector
+- [x] Debug-Info Anzeige (Current State, Velocity)
+- [x] MovementConfig Custom Editor (optional)
+- [x] Gizmos für Ground Check Raycast
+- [x] Gizmos für Movement Direction
 
 ### Commit 15: Unit Tests - Movement System
 - [ ] MovementSimulator Tests (Velocity Calculations)
