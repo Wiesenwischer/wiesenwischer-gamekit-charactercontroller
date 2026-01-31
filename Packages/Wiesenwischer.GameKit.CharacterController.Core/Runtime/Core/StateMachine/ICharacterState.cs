@@ -88,16 +88,35 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.StateMachine
     /// </summary>
     public interface IMovementConfig
     {
+        // Ground Movement
         float WalkSpeed { get; }
         float RunSpeed { get; }
         float Acceleration { get; }
         float Deceleration { get; }
+
+        // Air Movement
         float AirControl { get; }
         float Gravity { get; }
+        float MaxFallSpeed { get; }
+
+        // Jumping
         float JumpHeight { get; }
         float JumpDuration { get; }
+        float CoyoteTime { get; }
+        float JumpBufferTime { get; }
+
+        // Ground Detection
         float GroundCheckDistance { get; }
+        float GroundCheckRadius { get; }
         LayerMask GroundLayers { get; }
         float MaxSlopeAngle { get; }
+
+        // Rotation
+        float RotationSpeed { get; }
+        bool RotateTowardsMovement { get; }
+
+        // Step Detection
+        float MaxStepHeight { get; }
+        float MinStepDepth { get; }
     }
 }

@@ -36,12 +36,13 @@ Implementierungs-Checkliste basierend auf [IMPLEMENTATION_PLAN.md](IMPLEMENTATIO
 ## Phase 2: Movement System
 
 ### Commit 4: MovementConfig ScriptableObject
-- [ ] MovementConfig.cs erstellen
-- [ ] Movement-Parameter (Walk/Run Speed, Acceleration)
-- [ ] Jump-Konfiguration (Height, Duration)
-- [ ] Ground Detection Settings
-- [ ] Gravity-Einstellungen
-- [ ] CreateAssetMenu Attribute
+- [x] MovementConfig.cs erstellen
+- [x] Movement-Parameter (Walk/Run Speed, Acceleration)
+- [x] Jump-Konfiguration (Height, Duration, CoyoteTime, JumpBuffer)
+- [x] Ground Detection Settings (Distance, Radius, Layers, MaxSlope)
+- [x] Gravity-Einstellungen (Gravity, MaxFallSpeed)
+- [x] CreateAssetMenu Attribute
+- [x] IMovementConfig Interface erweitert
 
 ### Commit 5: Input Provider System
 - [ ] IMovementInputProvider Interface (falls nicht in Commit 3)
