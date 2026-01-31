@@ -105,11 +105,11 @@ Implementierungs-Checkliste basierend auf [IMPLEMENTATION_PLAN.md](IMPLEMENTATIO
 - [x] History-Speicherung
 
 ### Commit 12: Fixed Tick System
-- [ ] Tick-Rate Konfiguration (60Hz)
-- [ ] Tick-Akkumulator in PlayerController
-- [ ] FixedTick-Methode
-- [ ] Tick-Counter
-- [ ] Delta-Time Berechnung (1/tickRate)
+- [x] Tick-Rate Konfiguration (60Hz)
+- [x] Tick-Akkumulator in PlayerController
+- [x] FixedTick-Methode
+- [x] Tick-Counter
+- [x] Delta-Time Berechnung (1/tickRate)
 
 ### Commit 13: Jump Mechanik
 - [ ] Jump-Input Detection

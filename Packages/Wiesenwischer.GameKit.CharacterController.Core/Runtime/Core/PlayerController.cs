@@ -50,12 +50,9 @@ namespace Wiesenwischer.GameKit.CharacterController.Core
         private bool _jumpPressed;
         private float _verticalVelocity;
         private Vector3 _horizontalVelocity;
-        private int _currentTick;
 
         // Tick System
-        private float _tickAccumulator;
-        private const float TickRate = 60f;
-        private const float TickDelta = 1f / TickRate;
+        private TickSystem _tickSystem;
 
         #region IStateMachineContext Implementation
 
@@ -65,7 +62,7 @@ namespace Wiesenwischer.GameKit.CharacterController.Core
         public float VerticalVelocity { get => _verticalVelocity; set => _verticalVelocity = value; }
         public Vector3 HorizontalVelocity { get => _horizontalVelocity; set => _horizontalVelocity = value; }
         public IMovementConfig Config => _config;
-        public int CurrentTick => _currentTick;
+        public int CurrentTick => _tickSystem?.CurrentTick ?? 0;
 
         #endregion
 
@@ -101,6 +98,11 @@ namespace Wiesenwischer.GameKit.CharacterController.Core
         /// </summary>
         public CharacterStateMachine StateMachine => _stateMachine;
 
+        /// <summary>
+        /// Das Tick-System.
+        /// </summary>
+        public TickSystem TickSystem => _tickSystem;
+
         #endregion
 
         #region Unity Callbacks
@@ -108,6 +110,7 @@ namespace Wiesenwischer.GameKit.CharacterController.Core
         private void Awake()
         {
             InitializeComponents();
+            InitializeTickSystem();
             InitializeSystems();
             InitializeStateMachine();
         }
@@ -117,15 +120,15 @@ namespace Wiesenwischer.GameKit.CharacterController.Core
             // Update Input
             UpdateInput();
 
-            // Accumulate time for fixed tick
-            _tickAccumulator += Time.deltaTime;
+            // Update Tick System (executes FixedTick via event)
+            _tickSystem?.Update(Time.deltaTime);
+        }
 
-            // Run fixed ticks
-            while (_tickAccumulator >= TickDelta)
+        private void OnDestroy()
+        {
+            if (_tickSystem != null)
             {
-                FixedTick(TickDelta);
-                _tickAccumulator -= TickDelta;
-                _currentTick++;
+                _tickSystem.OnTick -= OnFixedTick;
             }
         }
 
@@ -144,6 +147,12 @@ namespace Wiesenwischer.GameKit.CharacterController.Core
         #endregion
 
         #region Initialization
+
+        private void InitializeTickSystem()
+        {
+            _tickSystem = new TickSystem(TickSystem.DefaultTickRate);
+            _tickSystem.OnTick += OnFixedTick;
+        }
 
         private void InitializeComponents()
         {
@@ -226,7 +235,7 @@ namespace Wiesenwischer.GameKit.CharacterController.Core
             _jumpPressed = _inputProvider.JumpPressed;
         }
 
-        private void FixedTick(float deltaTime)
+        private void OnFixedTick(int tick, float deltaTime)
         {
             // 1. Update Ground Detection
             _groundingDetection?.UpdateGroundCheck();
