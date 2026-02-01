@@ -1,36 +1,35 @@
 using UnityEngine;
+using Wiesenwischer.GameKit.CharacterController.Core.Data;
 using Wiesenwischer.GameKit.CharacterController.Core.Input;
 using Wiesenwischer.GameKit.CharacterController.Core.Locomotion;
 using Wiesenwischer.GameKit.CharacterController.Core.Motor;
 using Wiesenwischer.GameKit.CharacterController.Core.StateMachine;
-using Wiesenwischer.GameKit.CharacterController.Core.StateMachine.States;
 
 namespace Wiesenwischer.GameKit.CharacterController.Core
 {
     /// <summary>
     /// Hauptkomponente für Character Controller.
-    /// Verwendet kinematische Physik mit CapsuleCollider (kein Unity CharacterController).
-    /// Integriert Input, Locomotion, State Machine und Prediction.
-    /// CSP (Client-Side Prediction) kompatibel für MMO-Nutzung.
+    /// Basiert auf dem Genshin Impact Pattern:
+    /// - Zentraler Zugriffspunkt für alle Komponenten
+    /// - Verwendet PlayerMovementStateMachine mit ReusableData
+    /// - CSP (Client-Side Prediction) kompatibel für MMO-Nutzung
     /// </summary>
     [RequireComponent(typeof(CapsuleCollider))]
-    public class PlayerController : MonoBehaviour, IStateMachineContext
+    public class PlayerController : MonoBehaviour
     {
+        #region Inspector Fields
+
         [Header("Configuration")]
         [Tooltip("Locomotion-Konfiguration")]
         [SerializeField] private LocomotionConfig _config;
 
         [Header("Capsule Settings")]
-        [Tooltip("Skin Width für Kollisionserkennung (ähnlich CharacterController.skinWidth)")]
+        [Tooltip("Skin Width für Kollisionserkennung")]
         [SerializeField] private float _skinWidth = 0.02f;
 
         [Header("Input")]
         [Tooltip("Input Provider (optional - wird automatisch gesucht)")]
         [SerializeField] private MonoBehaviour _inputProviderComponent;
-
-        [Header("Ground Check")]
-        [Tooltip("Transform für Ground Check Position (optional)")]
-        [SerializeField] private Transform _groundCheckTransform;
 
         [Header("Debug")]
         [Tooltip("Debug-Informationen anzeigen")]
@@ -38,71 +37,67 @@ namespace Wiesenwischer.GameKit.CharacterController.Core
         [Tooltip("Debug-Gizmos zeichnen")]
         [SerializeField] private bool _drawGizmos = true;
 
-        // Components
-        private CapsuleCollider _capsuleCollider;
-        private IMovementInputProvider _inputProvider;
-
-        // Systems
-        private GroundingDetection _groundingDetection;
-        private CharacterLocomotion _locomotion;
-        private CharacterStateMachine _stateMachine;
-
-        // States
-        private GroundedState _groundedState;
-        private JumpingState _jumpingState;
-        private FallingState _fallingState;
-
-        // State Machine Context
-        private Vector2 _moveInput;
-        private bool _jumpPressed;
-        private bool _jumpHeld;
-        private float _verticalVelocity;
-        private Vector3 _horizontalVelocity;
-
-        // Tick System
-        private TickSystem _tickSystem;
-
-        #region IStateMachineContext Implementation
-
-        public Vector2 MoveInput => _moveInput;
-        public bool JumpPressed => _jumpPressed;
-        public bool JumpHeld => _jumpHeld;
-        public bool IsGrounded => _groundingDetection?.IsGrounded ?? false;
-        public float VerticalVelocity { get => _verticalVelocity; set => _verticalVelocity = value; }
-        public Vector3 HorizontalVelocity { get => _horizontalVelocity; set => _horizontalVelocity = value; }
-        public ILocomotionConfig Config => _config;
-        public int CurrentTick => _tickSystem?.CurrentTick ?? 0;
-
         #endregion
 
-        #region Public Properties
-
-        /// <summary>Der aktuelle State-Name.</summary>
-        public string CurrentStateName => _stateMachine?.CurrentStateName ?? "None";
-
-        /// <summary>Die aktuelle Geschwindigkeit.</summary>
-        public Vector3 Velocity => _horizontalVelocity + Vector3.up * _verticalVelocity;
+        #region Components (Genshin Pattern - Read-Only Properties)
 
         /// <summary>Der CapsuleCollider für Kollisionserkennung.</summary>
-        public CapsuleCollider CapsuleCollider => _capsuleCollider;
+        public CapsuleCollider CapsuleCollider { get; private set; }
 
-        /// <summary>Der kinematische Motor.</summary>
-        public KinematicMotor KinematicMotor => _locomotion?.Motor;
+        /// <summary>Der Input Provider.</summary>
+        public IMovementInputProvider InputProvider { get; private set; }
+
+        /// <summary>Ground Detection System.</summary>
+        public GroundingDetection GroundingDetection { get; private set; }
+
+        /// <summary>Character Locomotion System.</summary>
+        public CharacterLocomotion Locomotion { get; private set; }
 
         /// <summary>Die Locomotion-Konfiguration.</summary>
         public LocomotionConfig LocomotionConfig => _config;
 
-        /// <summary>Ground Detection System.</summary>
-        public GroundingDetection GroundingDetection => _groundingDetection;
+        /// <summary>Der kinematische Motor.</summary>
+        public KinematicMotor KinematicMotor => Locomotion?.Motor;
 
-        /// <summary>Die State Machine.</summary>
-        public CharacterStateMachine StateMachine => _stateMachine;
+        #endregion
+
+        #region State Machine
+
+        private PlayerMovementStateMachine _movementStateMachine;
+
+        /// <summary>Die Movement State Machine.</summary>
+        public PlayerMovementStateMachine MovementStateMachine => _movementStateMachine;
+
+        /// <summary>Shared runtime data (Shortcut).</summary>
+        public PlayerStateReusableData ReusableData => _movementStateMachine?.ReusableData;
+
+        #endregion
+
+        #region Tick System
+
+        private TickSystem _tickSystem;
 
         /// <summary>Das Tick-System.</summary>
         public TickSystem TickSystem => _tickSystem;
 
+        #endregion
+
+        #region Public Properties (Convenience)
+
+        /// <summary>Der aktuelle State-Name.</summary>
+        public string CurrentStateName => _movementStateMachine?.CurrentStateName ?? "None";
+
+        /// <summary>Ob der Character auf dem Boden steht.</summary>
+        public bool IsGrounded => GroundingDetection?.IsGrounded ?? false;
+
         /// <summary>Ob der Character gerade rutscht.</summary>
-        public bool IsSliding => _locomotion?.IsSliding ?? false;
+        public bool IsSliding => Locomotion?.IsSliding ?? false;
+
+        /// <summary>Die aktuelle Geschwindigkeit.</summary>
+        public Vector3 Velocity => ReusableData?.Velocity ?? Vector3.zero;
+
+        /// <summary>Aktueller Tick.</summary>
+        public int CurrentTick => _tickSystem?.CurrentTick ?? 0;
 
         #endregion
 
@@ -118,7 +113,13 @@ namespace Wiesenwischer.GameKit.CharacterController.Core
 
         private void Update()
         {
+            // 1. Input lesen und in ReusableData schreiben
             UpdateInput();
+
+            // 2. State Machine Update (HandleInput + Update)
+            _movementStateMachine?.Update();
+
+            // 3. Tick System aktualisieren
             _tickSystem?.Update(Time.deltaTime);
         }
 
@@ -133,8 +134,8 @@ namespace Wiesenwischer.GameKit.CharacterController.Core
         private void OnDrawGizmos()
         {
             if (!_drawGizmos) return;
-            _groundingDetection?.DrawDebugGizmos();
-            _locomotion?.DrawDebugGizmos();
+            GroundingDetection?.DrawDebugGizmos();
+            Locomotion?.DrawDebugGizmos();
         }
 
         private void OnGUI()
@@ -147,72 +148,43 @@ namespace Wiesenwischer.GameKit.CharacterController.Core
 
         #region Initialization
 
-        private void InitializeTickSystem()
-        {
-            _tickSystem = new TickSystem(TickSystem.DefaultTickRate);
-            _tickSystem.OnTick += OnFixedTick;
-        }
-
         private void InitializeComponents()
         {
             // Get CapsuleCollider
-            _capsuleCollider = GetComponent<CapsuleCollider>();
-            if (_capsuleCollider == null)
+            CapsuleCollider = GetComponent<CapsuleCollider>();
+            if (CapsuleCollider == null)
             {
                 Debug.LogError($"[PlayerController] FEHLER auf '{gameObject.name}': " +
-                    "CapsuleCollider-Komponente fehlt! " +
-                    "Füge eine CapsuleCollider-Komponente zum GameObject hinzu.");
+                    "CapsuleCollider-Komponente fehlt!");
                 enabled = false;
                 return;
             }
 
-            // Validate CapsuleCollider settings
-            if (_capsuleCollider.radius <= 0f)
+            // Validate CapsuleCollider
+            if (CapsuleCollider.radius <= 0f || CapsuleCollider.height <= 0f)
             {
                 Debug.LogError($"[PlayerController] FEHLER auf '{gameObject.name}': " +
-                    $"CapsuleCollider.radius ist {_capsuleCollider.radius}, muss aber > 0 sein.");
-            }
-
-            if (_capsuleCollider.height <= 0f)
-            {
-                Debug.LogError($"[PlayerController] FEHLER auf '{gameObject.name}': " +
-                    $"CapsuleCollider.height ist {_capsuleCollider.height}, muss aber > 0 sein.");
+                    "CapsuleCollider hat ungültige Dimensionen.");
             }
 
             // Find Input Provider
             if (_inputProviderComponent != null)
             {
-                _inputProvider = _inputProviderComponent as IMovementInputProvider;
-                if (_inputProvider == null)
-                {
-                    Debug.LogWarning($"[PlayerController] WARNUNG auf '{gameObject.name}': " +
-                        $"Das zugewiesene Input Provider Component '{_inputProviderComponent.GetType().Name}' " +
-                        "implementiert nicht IMovementInputProvider.");
-                }
+                InputProvider = _inputProviderComponent as IMovementInputProvider;
             }
+            InputProvider ??= GetComponent<IMovementInputProvider>();
 
-            if (_inputProvider == null)
-            {
-                _inputProvider = GetComponent<IMovementInputProvider>();
-            }
-
-            if (_inputProvider == null)
+            if (InputProvider == null)
             {
                 Debug.LogWarning($"[PlayerController] WARNUNG auf '{gameObject.name}': " +
-                    "Kein Input Provider gefunden. Der Character wird sich nicht bewegen können. " +
-                    "Lösungen: " +
-                    "(1) Füge PlayerInputProvider für Spieler-Steuerung hinzu, oder " +
-                    "(2) Füge AIInputProvider für KI-Steuerung hinzu, oder " +
-                    "(3) Weise einen Input Provider im Inspector zu.");
+                    "Kein Input Provider gefunden.");
             }
 
             // Validate config
             if (_config == null)
             {
                 Debug.LogError($"[PlayerController] FEHLER auf '{gameObject.name}': " +
-                    "Keine LocomotionConfig zugewiesen! " +
-                    "Erstelle ein LocomotionConfig ScriptableObject (Create > Wiesenwischer > GameKit > Locomotion Config) " +
-                    "und weise es im Inspector zu.");
+                    "Keine LocomotionConfig zugewiesen!");
                 enabled = false;
                 return;
             }
@@ -223,30 +195,17 @@ namespace Wiesenwischer.GameKit.CharacterController.Core
         private void ValidateLocomotionConfig()
         {
             if (_config.WalkSpeed <= 0f)
-            {
-                Debug.LogWarning($"[PlayerController] WARNUNG: LocomotionConfig.WalkSpeed ist {_config.WalkSpeed}, sollte > 0 sein.");
-            }
-
+                Debug.LogWarning("[PlayerController] WARNUNG: WalkSpeed sollte > 0 sein.");
             if (_config.Gravity <= 0f)
-            {
-                Debug.LogWarning($"[PlayerController] WARNUNG: LocomotionConfig.Gravity ist {_config.Gravity}, sollte > 0 sein.");
-            }
-
-            if (_config.MaxSlopeAngle < 0f || _config.MaxSlopeAngle > 90f)
-            {
-                Debug.LogWarning($"[PlayerController] WARNUNG: LocomotionConfig.MaxSlopeAngle ist {_config.MaxSlopeAngle}, sollte zwischen 0 und 90 liegen.");
-            }
-
-            if (_config.GroundCheckDistance <= 0f)
-            {
-                Debug.LogWarning($"[PlayerController] WARNUNG: LocomotionConfig.GroundCheckDistance ist {_config.GroundCheckDistance}, sollte > 0 sein.");
-            }
-
+                Debug.LogWarning("[PlayerController] WARNUNG: Gravity sollte > 0 sein.");
             if (_config.GroundLayers == 0)
-            {
-                Debug.LogWarning("[PlayerController] WARNUNG: LocomotionConfig.GroundLayers ist leer. " +
-                    "Der Character wird keinen Boden erkennen können.");
-            }
+                Debug.LogWarning("[PlayerController] WARNUNG: GroundLayers ist leer.");
+        }
+
+        private void InitializeTickSystem()
+        {
+            _tickSystem = new TickSystem(TickSystem.DefaultTickRate);
+            _tickSystem.OnTick += OnFixedTick;
         }
 
         private void InitializeSystems()
@@ -254,91 +213,99 @@ namespace Wiesenwischer.GameKit.CharacterController.Core
             if (_config == null) return;
 
             // Initialize Ground Detection
-            _groundingDetection = new GroundingDetection(
+            GroundingDetection = new GroundingDetection(
                 transform,
                 _config,
-                _capsuleCollider.radius,
-                _capsuleCollider.height
+                CapsuleCollider.radius,
+                CapsuleCollider.height
             );
 
-            // Initialize Character Locomotion with KinematicMotor
-            _locomotion = new CharacterLocomotion(
+            // Initialize Character Locomotion
+            Locomotion = new CharacterLocomotion(
                 transform,
-                _capsuleCollider,
+                CapsuleCollider,
                 _config,
-                _groundingDetection,
+                GroundingDetection,
                 _skinWidth
             );
         }
 
         private void InitializeStateMachine()
         {
-            // Create states
-            _jumpingState = new JumpingState();
-            _fallingState = new FallingState();
-            _groundedState = new GroundedState(_jumpingState, _fallingState);
-
-            // Set circular references
-            _jumpingState.SetStateReferences(_fallingState, _groundedState);
-            _fallingState.SetStateReferences(_groundedState, _jumpingState);
-
-            // Create and initialize state machine
-            _stateMachine = new CharacterStateMachine();
-            _stateMachine.RegisterStates(_groundedState, _jumpingState, _fallingState);
-            _stateMachine.Initialize(this, GroundedState.Name);
+            _movementStateMachine = new PlayerMovementStateMachine(this);
+            _movementStateMachine.Initialize();
         }
 
         #endregion
 
         #region Update Loop
 
+        /// <summary>
+        /// Liest Input und schreibt in ReusableData.
+        /// </summary>
         private void UpdateInput()
         {
-            if (_inputProvider == null) return;
+            if (InputProvider == null || ReusableData == null) return;
 
-            _inputProvider.UpdateInput();
-
-            _moveInput = _inputProvider.MoveInput;
-            _jumpPressed = _inputProvider.JumpPressed;
-            _jumpHeld = _inputProvider.JumpHeld;
-        }
-
-        private void OnFixedTick(int tick, float deltaTime)
-        {
-            // 1. Update State Machine
-            _stateMachine?.Update(deltaTime);
-
-            // 2. Apply Movement
-            ApplyMovement(deltaTime);
-        }
-
-        private void ApplyMovement(float deltaTime)
-        {
-            if (_locomotion == null) return;
-
-            // Create locomotion input
-            var input = new LocomotionInput
-            {
-                MoveDirection = _moveInput,
-                LookDirection = GetCameraForward(),
-                IsSprinting = _inputProvider?.SprintHeld ?? false,
-                VerticalVelocity = _verticalVelocity
-            };
-
-            // Simulate locomotion
-            _locomotion.Simulate(input, deltaTime);
-
-            // Update velocities from locomotion
-            _verticalVelocity = _locomotion.VerticalVelocity;
-            _horizontalVelocity = _locomotion.HorizontalVelocity;
+            ReusableData.MoveInput = InputProvider.MoveInput;
+            ReusableData.JumpPressed = InputProvider.JumpPressed;
+            ReusableData.JumpHeld = InputProvider.JumpHeld;
+            ReusableData.SprintHeld = InputProvider.SprintHeld;
+            ReusableData.DashPressed = InputProvider.DashPressed;
         }
 
         /// <summary>
-        /// Ermittelt die Forward-Richtung der Kamera für kamera-relative Bewegung.
+        /// Fixed Tick - Physics Update.
+        /// </summary>
+        private void OnFixedTick(int tick, float deltaTime)
+        {
+            if (ReusableData == null) return;
+
+            // Update Tick in ReusableData
+            ReusableData.CurrentTick = tick;
+
+            // Update IsGrounded in ReusableData
+            ReusableData.IsGrounded = GroundingDetection?.IsGrounded ?? false;
+            ReusableData.IsSliding = Locomotion?.IsSliding ?? false;
+
+            // State Machine Physics Update
+            _movementStateMachine?.PhysicsUpdate(deltaTime);
+
+            // Apply Movement
+            ApplyMovement(deltaTime);
+        }
+
+        /// <summary>
+        /// Wendet Bewegung über Locomotion an.
+        /// </summary>
+        private void ApplyMovement(float deltaTime)
+        {
+            if (Locomotion == null || ReusableData == null) return;
+
+            // Create locomotion input from ReusableData
+            var input = new LocomotionInput
+            {
+                MoveDirection = ReusableData.MoveInput,
+                LookDirection = GetCameraForward(),
+                IsSprinting = ReusableData.SprintHeld,
+                VerticalVelocity = ReusableData.VerticalVelocity,
+                StepDetectionEnabled = ReusableData.StepDetectionEnabled
+            };
+
+            // Simulate locomotion
+            Locomotion.Simulate(input, deltaTime);
+
+            // Sync velocities back to ReusableData
+            ReusableData.VerticalVelocity = Locomotion.VerticalVelocity;
+            ReusableData.HorizontalVelocity = Locomotion.HorizontalVelocity;
+        }
+
+        /// <summary>
+        /// Ermittelt die Forward-Richtung der Kamera.
         /// </summary>
         private Vector3 GetCameraForward()
         {
-            var mainCamera = UnityEngine.Camera.main;
+            var mainCamera = Camera.main;
             if (mainCamera != null)
             {
                 Vector3 cameraForward = mainCamera.transform.forward;
@@ -360,7 +327,7 @@ namespace Wiesenwischer.GameKit.CharacterController.Core
         /// </summary>
         public void SetPosition(Vector3 position)
         {
-            _locomotion?.Motor?.SetPosition(position);
+            Locomotion?.Motor?.SetPosition(position);
         }
 
         /// <summary>
@@ -368,17 +335,8 @@ namespace Wiesenwischer.GameKit.CharacterController.Core
         /// </summary>
         public void ResetVelocity()
         {
-            _verticalVelocity = 0f;
-            _horizontalVelocity = Vector3.zero;
-            _locomotion?.StopMovement();
-        }
-
-        /// <summary>
-        /// Erzwingt einen State-Wechsel.
-        /// </summary>
-        public void ForceState(string stateName)
-        {
-            _stateMachine?.TransitionTo(stateName, StateTransitionReason.Forced);
+            ReusableData?.ResetMovementData();
+            Locomotion?.StopMovement();
         }
 
         #endregion
@@ -390,23 +348,27 @@ namespace Wiesenwischer.GameKit.CharacterController.Core
             GUILayout.BeginArea(new Rect(10, 10, 350, 250));
             GUILayout.BeginVertical("box");
 
-            GUILayout.Label($"<b>PlayerController Debug (Kinematic)</b>");
+            GUILayout.Label($"<b>PlayerController (Genshin Pattern)</b>");
             GUILayout.Label($"State: {CurrentStateName}");
             GUILayout.Label($"Grounded: {IsGrounded}");
             GUILayout.Label($"Sliding: {IsSliding}");
             GUILayout.Label($"Velocity: {Velocity:F2}");
-            GUILayout.Label($"H-Velocity: {_horizontalVelocity.magnitude:F2}");
-            GUILayout.Label($"V-Velocity: {_verticalVelocity:F2}");
-            GUILayout.Label($"Tick: {CurrentTick}");
 
-            if (_groundingDetection != null)
+            if (ReusableData != null)
             {
-                var gi = _groundingDetection.GroundInfo;
-                GUILayout.Label($"Slope: {gi.SlopeAngle:F1}° ({(gi.IsWalkable ? "walkable" : "too steep")})");
-                GUILayout.Label($"MaxSlope: {_config.MaxSlopeAngle:F1}°");
+                GUILayout.Label($"H-Velocity: {ReusableData.HorizontalVelocity.magnitude:F2}");
+                GUILayout.Label($"V-Velocity: {ReusableData.VerticalVelocity:F2}");
             }
 
-            GUILayout.Label($"<i>CSP-Ready: Kinematic Physics</i>");
+            GUILayout.Label($"Tick: {CurrentTick}");
+
+            if (GroundingDetection != null)
+            {
+                var gi = GroundingDetection.GroundInfo;
+                GUILayout.Label($"Slope: {gi.SlopeAngle:F1}° ({(gi.IsWalkable ? "walkable" : "too steep")})");
+            }
+
+            GUILayout.Label($"<i>CSP-Ready</i>");
 
             GUILayout.EndVertical();
             GUILayout.EndArea();

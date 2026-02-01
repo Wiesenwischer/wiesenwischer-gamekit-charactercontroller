@@ -86,6 +86,12 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.Locomotion
         public float VerticalVelocity;
 
         /// <summary>
+        /// Ob Step Detection aktiv sein soll.
+        /// Wird von Grounded States auf true gesetzt, von Airborne States auf false.
+        /// </summary>
+        public bool StepDetectionEnabled;
+
+        /// <summary>
         /// Erstellt einen leeren Locomotion Input.
         /// </summary>
         public static LocomotionInput Empty => new LocomotionInput
@@ -93,7 +99,8 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.Locomotion
             MoveDirection = Vector2.zero,
             LookDirection = Vector3.forward,
             IsSprinting = false,
-            VerticalVelocity = 0f
+            VerticalVelocity = 0f,
+            StepDetectionEnabled = false
         };
     }
 

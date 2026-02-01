@@ -1,0 +1,71 @@
+using UnityEngine;
+
+namespace Wiesenwischer.GameKit.CharacterController.Core.StateMachine
+{
+    /// <summary>
+    /// Interface für Locomotion-Konfiguration.
+    /// Ermöglicht den Zugriff auf Locomotion-Parameter ohne direkte Abhängigkeit von ScriptableObject.
+    /// Wird von CharacterLocomotion und anderen Locomotion-Typen verwendet.
+    /// </summary>
+    public interface ILocomotionConfig
+    {
+        // Ground Movement
+        float WalkSpeed { get; }
+        float RunSpeed { get; }
+        float Acceleration { get; }
+        float Deceleration { get; }
+
+        // Air Movement
+        float AirControl { get; }
+        float Gravity { get; }
+        float MaxFallSpeed { get; }
+
+        // Jumping
+        float JumpHeight { get; }
+        float JumpDuration { get; }
+        float CoyoteTime { get; }
+        float JumpBufferTime { get; }
+
+        /// <summary>
+        /// Wenn true, kann der Sprung durch frühes Loslassen der Taste abgebrochen werden (niedrigerer Sprung).
+        /// Wenn false, springt der Character immer die volle Höhe.
+        /// </summary>
+        bool UseVariableJump { get; }
+
+        // Ground Detection
+        float GroundCheckDistance { get; }
+        float GroundCheckRadius { get; }
+        LayerMask GroundLayers { get; }
+        float MaxSlopeAngle { get; }
+
+        // Rotation
+        float RotationSpeed { get; }
+        bool RotateTowardsMovement { get; }
+
+        // Step Detection
+        float MaxStepHeight { get; }
+        float MinStepDepth { get; }
+
+        // Slope Sliding
+        float SlopeSlideSpeed { get; }
+
+        /// <summary>
+        /// Wenn true, skaliert die Sliding-Geschwindigkeit mit der Steilheit des Hangs.
+        /// Wenn false, wird immer SlopeSlideSpeed als feste Geschwindigkeit verwendet.
+        /// </summary>
+        bool UseSlopeDependentSlideSpeed { get; }
+
+        // Landing
+        /// <summary>Fallgeschwindigkeit unter der sofort weitergelaufen werden kann.</summary>
+        float SoftLandingThreshold { get; }
+
+        /// <summary>Fallgeschwindigkeit ab der maximale Recovery-Zeit gilt.</summary>
+        float HardLandingThreshold { get; }
+
+        /// <summary>Recovery-Zeit bei weicher Landung (Sekunden).</summary>
+        float SoftLandingDuration { get; }
+
+        /// <summary>Recovery-Zeit bei harter Landung (Sekunden).</summary>
+        float HardLandingDuration { get; }
+    }
+}
