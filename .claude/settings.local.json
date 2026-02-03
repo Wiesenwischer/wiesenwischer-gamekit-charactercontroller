@@ -5,7 +5,14 @@
       "Bash(git lfs install:*)",
       "Bash(git commit:*)",
       "Bash(git add:*)",
-      "Bash(git push)"
+      "Bash(git push)",
+      "Bash(gh api:*)",
+      "WebFetch(domain:opsive.com)",
+      "Bash(dir:*)"
     ]
-  }
+  },
+  "enabledMcpjsonServers": [
+    "unity"
+  ],
+  "enableAllProjectMcpServers": true
 }
