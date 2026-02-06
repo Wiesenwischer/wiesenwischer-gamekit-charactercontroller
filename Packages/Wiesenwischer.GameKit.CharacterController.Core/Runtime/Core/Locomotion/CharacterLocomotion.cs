@@ -1,4 +1,5 @@
 using UnityEngine;
+using Wiesenwischer.GameKit.CharacterController.Core.Locomotion.Modules;
 using Wiesenwischer.GameKit.CharacterController.Core.Motor;
 using Wiesenwischer.GameKit.CharacterController.Core.StateMachine;
 
@@ -13,6 +14,10 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.Locomotion
         private readonly CharacterMotor _motor;
         private readonly Transform _transform;
         private readonly ILocomotionConfig _config;
+
+        // Module
+        private readonly GravityModule _gravityModule;
+        private readonly AccelerationModule _accelerationModule;
 
         // Input für den aktuellen Frame
         private LocomotionInput _currentInput;
@@ -36,6 +41,10 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.Locomotion
             _motor = motor ?? throw new System.ArgumentNullException(nameof(motor));
             _config = config ?? throw new System.ArgumentNullException(nameof(config));
             _transform = motor.Transform;
+
+            // Module initialisieren
+            _gravityModule = new GravityModule();
+            _accelerationModule = new AccelerationModule();
 
             // Registriere uns als Controller beim Motor
             _motor.CharacterController = this;
@@ -133,12 +142,30 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.Locomotion
 
         public void UpdateVelocity(ref Vector3 currentVelocity, float deltaTime)
         {
-            // Horizontale Bewegung
-            Vector3 targetHorizontal = CalculateTargetHorizontalVelocity(_currentInput);
-            _horizontalVelocity = ApplyAcceleration(_horizontalVelocity, targetHorizontal, deltaTime);
+            // Horizontale Bewegung (via AccelerationModule)
+            Vector3 targetHorizontal = _accelerationModule.CalculateTargetVelocity(
+                _currentInput.MoveDirection,
+                _currentInput.LookDirection,
+                _transform.forward,
+                _config.WalkSpeed,
+                _currentInput.SpeedModifier);
 
-            // Vertikale Bewegung
-            _verticalVelocity = CalculateVerticalVelocity(_currentInput.VerticalVelocity, deltaTime);
+            _horizontalVelocity = _accelerationModule.CalculateHorizontalVelocity(
+                _horizontalVelocity,
+                targetHorizontal,
+                _config.Acceleration,
+                _config.Deceleration,
+                _config.AirControl,
+                _motor.GroundingStatus.IsStableOnGround,
+                deltaTime);
+
+            // Vertikale Bewegung (via GravityModule)
+            _verticalVelocity = _gravityModule.CalculateVerticalVelocity(
+                _currentInput.VerticalVelocity,
+                _motor.GroundingStatus.IsStableOnGround,
+                _config.Gravity,
+                _config.MaxFallSpeed,
+                deltaTime);
 
             // ForceUnground wenn wir springen
             if (_currentInput.VerticalVelocity > 0 && _verticalVelocity > 0)
@@ -155,11 +182,10 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.Locomotion
             // Nach Ground Probing - hier haben wir den aktuellen Ground-State
             UpdateCachedGroundInfo();
 
-            // Wenn wir stabil stehen und nicht fallen, kleine negative Velocity
-            if (_motor.GroundingStatus.IsStableOnGround && _verticalVelocity <= 0f)
-            {
-                _verticalVelocity = -2f;
-            }
+            // Ground Snapping via GravityModule
+            _verticalVelocity = _gravityModule.ApplyGroundSnapping(
+                _verticalVelocity,
+                _motor.GroundingStatus.IsStableOnGround);
         }
 
         public void AfterCharacterUpdate(float deltaTime)
@@ -191,65 +217,6 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.Locomotion
         public void OnDiscreteCollisionDetected(Collider hitCollider)
         {
             // Discrete collision detected
-        }
-
-        #endregion
-
-        #region Movement Logic
-
-        private Vector3 CalculateTargetHorizontalVelocity(LocomotionInput input)
-        {
-            Vector3 inputDir = new Vector3(input.MoveDirection.x, 0, input.MoveDirection.y);
-
-            // Transformiere Input relativ zur Kamera/Look-Richtung
-            if (input.LookDirection.sqrMagnitude > 0.01f)
-            {
-                Quaternion lookRot = Quaternion.LookRotation(
-                    new Vector3(input.LookDirection.x, 0, input.LookDirection.z).normalized,
-                    Vector3.up);
-                inputDir = lookRot * inputDir;
-            }
-            else
-            {
-                inputDir = _transform.TransformDirection(inputDir);
-            }
-
-            // SpeedModifier kontrolliert die Geschwindigkeit
-            float speed = _config.WalkSpeed * input.SpeedModifier;
-
-            return inputDir.normalized * speed * inputDir.magnitude;
-        }
-
-        private Vector3 ApplyAcceleration(Vector3 current, Vector3 target, float deltaTime)
-        {
-            float accel = target.sqrMagnitude > 0.01f ? _config.Acceleration : _config.Deceleration;
-
-            // Weniger Kontrolle in der Luft
-            if (!_motor.GroundingStatus.IsStableOnGround)
-            {
-                accel *= _config.AirControl;
-            }
-
-            return Vector3.MoveTowards(current, target, accel * deltaTime);
-        }
-
-        private float CalculateVerticalVelocity(float inputVerticalVelocity, float deltaTime)
-        {
-            float velocity = inputVerticalVelocity;
-
-            const float GroundingVelocity = -2f;
-
-            // Wenn grounded und velocity <= 0, Grounding-Velocity (hält Character am Boden)
-            if (_motor.GroundingStatus.IsStableOnGround && velocity <= 0)
-            {
-                return GroundingVelocity;
-            }
-
-            // Nicht grounded → Gravity anwenden
-            velocity -= _config.Gravity * deltaTime;
-            velocity = Mathf.Max(velocity, -_config.MaxFallSpeed);
-
-            return velocity;
         }
 
         #endregion
