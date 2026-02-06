@@ -18,6 +18,7 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.Locomotion
         // Module
         private readonly GravityModule _gravityModule;
         private readonly AccelerationModule _accelerationModule;
+        private readonly GroundDetectionModule _groundDetectionModule;
 
         // Input für den aktuellen Frame
         private LocomotionInput _currentInput;
@@ -45,6 +46,7 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.Locomotion
             // Module initialisieren
             _gravityModule = new GravityModule();
             _accelerationModule = new AccelerationModule();
+            _groundDetectionModule = new GroundDetectionModule();
 
             // Registriere uns als Controller beim Motor
             _motor.CharacterController = this;
@@ -225,30 +227,8 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.Locomotion
 
         private void UpdateCachedGroundInfo()
         {
-            var grounding = _motor.GroundingStatus;
-
-            _cachedGroundInfo = new GroundInfo
-            {
-                IsGrounded = grounding.FoundAnyGround,
-                Point = grounding.GroundPoint,
-                Normal = grounding.GroundNormal,
-                SlopeAngle = Vector3.Angle(Vector3.up, grounding.GroundNormal),
-                Distance = 0f,
-                IsWalkable = grounding.IsStableOnGround,
-                StabilityReport = ConvertStabilityReport(grounding)
-            };
-        }
-
-        private HitStabilityReport ConvertStabilityReport(CharacterGroundingReport grounding)
-        {
-            return new HitStabilityReport
-            {
-                IsStable = grounding.IsStableOnGround,
-                InnerNormal = grounding.InnerGroundNormal,
-                OuterNormal = grounding.OuterGroundNormal,
-                FoundInnerNormal = true,
-                FoundOuterNormal = true
-            };
+            // GroundDetectionModule kapselt die Motor-Status Interpretation
+            _cachedGroundInfo = _groundDetectionModule.GetGroundInfo(_motor);
         }
 
         #endregion
