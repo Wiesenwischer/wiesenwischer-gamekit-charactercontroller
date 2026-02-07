@@ -28,6 +28,9 @@ Dieser Plan beschreibt die schrittweise Implementierung des GameKit Character Co
 | 4 | Ability System | ❌ | Offen |
 | 5 | Netzwerk-Grundstruktur | ❌ | Offen |
 | 6 | Netzwerk-Animation | ❌ | Offen |
+| 7 | IK System | ❌ | Offen |
+| 8 | Combat Abilities | ❌ | Offen |
+| 9 | Alternative Movement | ❌ | Offen |
 
 ---
 
@@ -133,17 +136,80 @@ Dieser Plan beschreibt die schrittweise Implementierung des GameKit Character Co
 
 ---
 
+### Phase 7: IK System
+**Branch:** `feature/phase-7-ik-system`
+**Ausgearbeitet:** ❌ Nein
+
+**Relevante Spezifikationen:**
+- [GameKit IK Spezifikation](../specs/GameKit_IK_Spezifikation.md)
+- [Animationskonzept LayeredAbilities](../specs/Animationskonzept_LayeredAbilities.md)
+
+**Schritte:**
+- [ ] 7.1 IK Package Struktur
+- [ ] 7.2 IKManager Komponente
+- [ ] 7.3 LookAtIK Implementation
+- [ ] 7.4 FootIK Implementation
+- [ ] 7.5 HandIK Implementation
+- [ ] 7.6 IK Netzwerk-Sync
+
+---
+
+### Phase 8: Combat Abilities
+**Branch:** `feature/phase-8-combat-abilities`
+**Ausgearbeitet:** ❌ Nein
+
+**Relevante Spezifikationen:**
+- [Skills & Action Combat](../specs/GameKit_Skills_ActionCombat.md)
+- [Modulare Fertigkeiten Controller v2](../specs/ModularFertigkeitenController_Spezifikation_v2.md)
+- [Animationskonzept LayeredAbilities](../specs/Animationskonzept_LayeredAbilities.md)
+
+**Schritte:**
+- [ ] 8.1 Combat Package Struktur
+- [ ] 8.2 MeleeAbility (Nahkampf)
+- [ ] 8.3 RangedAbility (Fernkampf/Bogen)
+- [ ] 8.4 SpellAbility (Zauber)
+- [ ] 8.5 Combat Animationen
+- [ ] 8.6 Combat Netzwerk-Sync
+
+---
+
+### Phase 9: Alternative Movement
+**Branch:** `feature/phase-9-alternative-movement`
+**Ausgearbeitet:** ❌ Nein
+
+**Relevante Spezifikationen:**
+- [Animationskonzept LayeredAbilities](../specs/Animationskonzept_LayeredAbilities.md)
+- [GameKit CharacterController Modular](../specs/GameKit_CharacterController_Modular.md)
+
+**Schritte:**
+- [ ] 9.1 Movement Controller Abstraktion
+- [ ] 9.2 RidingController (Reiten)
+- [ ] 9.3 GlidingController (Gleiten)
+- [ ] 9.4 SwimmingController (Schwimmen)
+- [ ] 9.5 Movement Animationen
+- [ ] 9.6 Movement Netzwerk-Sync
+
+---
+
 ## Abhängigkeiten
 
 ```
-Phase 1 ──> Phase 2 ──> Phase 3
+Phase 1 ──> Phase 2 ──> Phase 3 ──> Phase 7 (IK)
                             │
                             v
-                       Phase 4
+                       Phase 4 ──> Phase 8 (Combat)
                             │
                             v
                        Phase 5 ──> Phase 6
+                            │
+                            v
+                       Phase 9 (Alt. Movement)
 ```
+
+**Erläuterung:**
+- Phase 7 (IK) baut auf Animation-Integration (Phase 3) auf
+- Phase 8 (Combat) baut auf Ability System (Phase 4) auf
+- Phase 9 (Alt. Movement) kann nach Netzwerk-Grundstruktur erfolgen
 
 ---
 
@@ -181,5 +247,8 @@ gh pr create --title "feat: Phase X - Name"
 | 4 | Ability System | ~4h |
 | 5 | Netzwerk-Grundstruktur | ~5h |
 | 6 | Netzwerk-Animation | ~4h |
+| 7 | IK System | ~4h |
+| 8 | Combat Abilities | ~6h |
+| 9 | Alternative Movement | ~6h |
 
-**Gesamt:** ~21 Stunden
+**Gesamt:** ~37 Stunden
