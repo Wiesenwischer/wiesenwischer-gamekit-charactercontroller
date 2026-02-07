@@ -27,20 +27,29 @@ docs/implementation/phase-X-*/
 - Empfehle `/plan-phase` auszuführen
 - Fahre NICHT mit Implementierung fort
 
-### 3. Schritt-Dokumentation lesen
+### 3. Spezifikationen lesen (PFLICHT)
+
+Lies ZUERST die verlinkten Spezifikationen der Phase:
+- Siehe `docs/implementation/README.md` → "Relevante Spezifikationen" der aktuellen Phase
+- Verstehe die Architektur-Entscheidungen und Konzepte
+- Halte dich an die Vorgaben aus den Spezifikationen
+
+**WICHTIG:** Die Spezifikationen sind bindend. Implementierungen müssen den Spezifikationen entsprechen.
+
+### 4. Schritt-Dokumentation lesen
 
 Lies die Dokumentation für den nächsten Schritt:
 - `docs/implementation/phase-X-*/X.Y-step-name.md`
 - Verstehe Ziel, Anforderungen, erwartetes Ergebnis
 
-### 4. Architektur-Review
+### 5. Architektur-Review
 
 Bevor implementiert wird:
 - Lies relevante bestehende Dateien
 - Verstehe Abhängigkeiten und Schnittstellen
 - Prüfe ob Voraussetzungen erfüllt sind
 
-### 5. Branch-Management
+### 6. Branch-Management
 
 Prüfe aktuellen Branch:
 ```bash
@@ -60,14 +69,14 @@ git checkout -b feature/phase-X-beschreibung
 **Falls auf falschem Branch:**
 - Informiere User und frage wie vorzugehen ist
 
-### 6. Implementierung durchführen
+### 7. Implementierung durchführen
 
 Führe die Schritte aus der Dokumentation durch:
 - Befolge die Anweisungen exakt
 - Erstelle/modifiziere Dateien wie beschrieben
 - Schreibe Tests für neue Funktionalität
 
-### 7. Tests schreiben
+### 8. Tests schreiben
 
 Für jede neue Klasse/Modul:
 - Unit Tests erstellen
@@ -75,7 +84,7 @@ Für jede neue Klasse/Modul:
 - Test-Klasse mit `[TestFixture]` Attribut
 - Mindestens: Konstruktion, Hauptfunktionalität
 
-### 8. Kompilierung prüfen
+### 9. Kompilierung prüfen
 
 ```bash
 powershell -Command "Get-Content 'C:\Users\marcu\AppData\Local\Unity\Editor\Editor.log' -Tail 100 | Select-String -Pattern 'error|CS\d{4}'"
@@ -83,7 +92,7 @@ powershell -Command "Get-Content 'C:\Users\marcu\AppData\Local\Unity\Editor\Edit
 
 **Bei Fehlern:** Beheben bevor Commit erstellt wird.
 
-### 9. Commit erstellen
+### 10. Commit erstellen
 
 ```bash
 git add <geänderte-dateien>
@@ -94,7 +103,7 @@ git commit -m "feat(phase-X): X.Y Beschreibung"
 - Kein Claude-Footer (kein "Co-Authored-By")
 - Commit-Message exakt wie in Schritt-Dokumentation angegeben
 
-### 10. Dokumentation aktualisieren
+### 11. Dokumentation aktualisieren
 
 In `docs/implementation/README.md`:
 - Checkbox abhaken: `- [ ]` → `- [x]`
@@ -108,14 +117,14 @@ git add docs/implementation/
 git commit -m "docs: Markiere Schritt X.Y als abgeschlossen"
 ```
 
-### 11. Push (optional)
+### 12. Push (optional)
 
 Falls Schritt abgeschlossen:
 ```bash
 git push -u origin feature/phase-X-beschreibung
 ```
 
-### 12. Nächsten Schritt anzeigen
+### 13. Nächsten Schritt anzeigen
 
 Informiere den User:
 - Was wurde implementiert

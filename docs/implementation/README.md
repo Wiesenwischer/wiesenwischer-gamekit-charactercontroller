@@ -14,6 +14,20 @@ Dieser Plan beschreibt die schrittweise Implementierung des GameKit Character Co
 - Jede Phase = eigener Feature-Branch
 - Jeder Schritt = eigener Commit
 - Dokumentation vor Implementierung
+- Spezifikationen **müssen** vor Implementierung gelesen werden
+
+---
+
+## Phasen-Übersicht
+
+| Phase | Name | Ausgearbeitet | Status |
+|-------|------|---------------|--------|
+| 1 | Animation-Vorbereitung | ✅ | Offen |
+| 2 | Animator Setup | ❌ | Offen |
+| 3 | Animation-Integration | ❌ | Offen |
+| 4 | Ability System | ❌ | Offen |
+| 5 | Netzwerk-Grundstruktur | ❌ | Offen |
+| 6 | Netzwerk-Animation | ❌ | Offen |
 
 ---
 
@@ -21,55 +35,101 @@ Dieser Plan beschreibt die schrittweise Implementierung des GameKit Character Co
 
 ### Phase 1: Animation-Vorbereitung
 **Branch:** `feature/phase-1-animation-prep`
+**Ausgearbeitet:** ✅ Ja
 
+**Relevante Spezifikationen:**
+- [Animationskonzept LayeredAbilities](../specs/Animationskonzept_LayeredAbilities.md)
+- [GameKit CharacterController Modular](../specs/GameKit_CharacterController_Modular.md)
+
+**Schritte:**
 - [ ] [1.1 Character Asset beschaffen](phase-1-animation-prep/1.1-character-asset.md)
 - [ ] [1.2 Character in Unity importieren](phase-1-animation-prep/1.2-import-character.md)
 - [ ] [1.3 Basis-Animationen beschaffen](phase-1-animation-prep/1.3-animations.md)
 - [ ] [1.4 Animation Package Struktur](phase-1-animation-prep/1.4-package-structure.md)
 
+---
+
 ### Phase 2: Animator Setup
 **Branch:** `feature/phase-2-animator-setup`
+**Ausgearbeitet:** ❌ Nein
 
-- [ ] [2.1 Avatar Masks erstellen](phase-2-animator-setup/2.1-avatar-masks.md)
-- [ ] [2.2 Animator Controller erstellen](phase-2-animator-setup/2.2-animator-controller.md)
-- [ ] [2.3 Locomotion Blend Tree](phase-2-animator-setup/2.3-locomotion-blend-tree.md)
-- [ ] [2.4 Airborne States](phase-2-animator-setup/2.4-airborne-states.md)
-- [ ] [2.5 Parameter-Bridge](phase-2-animator-setup/2.5-parameter-bridge.md)
+**Relevante Spezifikationen:**
+- [Animationskonzept LayeredAbilities](../specs/Animationskonzept_LayeredAbilities.md)
+
+**Schritte:**
+- [ ] 2.1 Avatar Masks erstellen
+- [ ] 2.2 Animator Controller erstellen
+- [ ] 2.3 Locomotion Blend Tree
+- [ ] 2.4 Airborne States
+- [ ] 2.5 Parameter-Bridge
+
+---
 
 ### Phase 3: Animation-Integration
 **Branch:** `feature/phase-3-animation-integration`
+**Ausgearbeitet:** ❌ Nein
 
-- [ ] [3.1 IAnimationController Interface](phase-3-animation-integration/3.1-animation-interface.md)
-- [ ] [3.2 CharacterAnimator Komponente](phase-3-animation-integration/3.2-character-animator.md)
-- [ ] [3.3 State Machine Sync](phase-3-animation-integration/3.3-state-machine-sync.md)
-- [ ] [3.4 Player Prefab](phase-3-animation-integration/3.4-player-prefab.md)
-- [ ] [3.5 Testing & Feintuning](phase-3-animation-integration/3.5-testing.md)
+**Relevante Spezifikationen:**
+- [Animationskonzept LayeredAbilities](../specs/Animationskonzept_LayeredAbilities.md)
+- [GameKit IK Spezifikation](../specs/GameKit_IK_Spezifikation.md)
+
+**Schritte:**
+- [ ] 3.1 IAnimationController Interface
+- [ ] 3.2 CharacterAnimator Komponente
+- [ ] 3.3 State Machine Sync
+- [ ] 3.4 Player Prefab
+- [ ] 3.5 Testing & Feintuning
+
+---
 
 ### Phase 4: Ability System
 **Branch:** `feature/phase-4-ability-system`
+**Ausgearbeitet:** ❌ Nein
 
-- [ ] [4.1 IAbility Interface](phase-4-ability-system/4.1-ability-interface.md)
-- [ ] [4.2 AbilitySystem Manager](phase-4-ability-system/4.2-ability-system.md)
-- [ ] [4.3 JumpAbility](phase-4-ability-system/4.3-jump-ability.md)
-- [ ] [4.4 SprintAbility](phase-4-ability-system/4.4-sprint-ability.md)
-- [ ] [4.5 Animation Layer Integration](phase-4-ability-system/4.5-animation-layer.md)
+**Relevante Spezifikationen:**
+- [Modulare Fertigkeiten Controller v2](../specs/ModularFertigkeitenController_Spezifikation_v2.md)
+- [Skills & Action Combat](../specs/GameKit_Skills_ActionCombat.md)
+
+**Schritte:**
+- [ ] 4.1 IAbility Interface
+- [ ] 4.2 AbilitySystem Manager
+- [ ] 4.3 JumpAbility
+- [ ] 4.4 SprintAbility
+- [ ] 4.5 Animation Layer Integration
+
+---
 
 ### Phase 5: Netzwerk-Grundstruktur
 **Branch:** `feature/phase-5-network`
+**Ausgearbeitet:** ❌ Nein
 
-- [ ] [5.1 FishNet einbinden](phase-5-network/5.1-fishnet-setup.md)
-- [ ] [5.2 NetworkPlayer](phase-5-network/5.2-network-player.md)
-- [ ] [5.3 Input Sync](phase-5-network/5.3-input-sync.md)
-- [ ] [5.4 Position/Rotation Sync](phase-5-network/5.4-transform-sync.md)
-- [ ] [5.5 Client-Side Prediction](phase-5-network/5.5-csp.md)
+**Relevante Spezifikationen:**
+- [CSP Spezifikation](../specs/CSP_Spezifikation.md)
+- [GameKit MMO Basics](../specs/GameKit_MMO_Basics.md)
+- [GameKit InputSystem Spezifikation](../specs/GameKit_InputSystem_Spezifikation.md)
+
+**Schritte:**
+- [ ] 5.1 FishNet einbinden
+- [ ] 5.2 NetworkPlayer
+- [ ] 5.3 Input Sync
+- [ ] 5.4 Position/Rotation Sync
+- [ ] 5.5 Client-Side Prediction
+
+---
 
 ### Phase 6: Netzwerk-Animation
 **Branch:** `feature/phase-6-network-animation`
+**Ausgearbeitet:** ❌ Nein
 
-- [ ] [6.1 Animator Sync](phase-6-network-animation/6.1-animator-sync.md)
-- [ ] [6.2 State Sync](phase-6-network-animation/6.2-state-sync.md)
-- [ ] [6.3 Ability Sync](phase-6-network-animation/6.3-ability-sync.md)
-- [ ] [6.4 Lag Compensation](phase-6-network-animation/6.4-lag-compensation.md)
+**Relevante Spezifikationen:**
+- [CSP Spezifikation](../specs/CSP_Spezifikation.md)
+- [GameKit MMO Basics](../specs/GameKit_MMO_Basics.md)
+
+**Schritte:**
+- [ ] 6.1 Animator Sync
+- [ ] 6.2 State Sync
+- [ ] 6.3 Ability Sync
+- [ ] 6.4 Lag Compensation
 
 ---
 
