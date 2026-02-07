@@ -16,8 +16,9 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.StateMachine.States
         {
             base.OnEnter();
 
-            // Momentum beibehalten (AirborneState hatte SpeedModifier auf AirControl reduziert)
-            ReusableData.MovementSpeedModifier = 1f;
+            // Momentum bleibt erhalten: AirborneState konserviert den SpeedModifier
+            // aus dem Grounded State (z.B. 2.0 von RunningState).
+            // Kein Override nötig – OnUpdate() transitioniert sofort zum passenden State.
         }
 
         protected override void OnUpdate()

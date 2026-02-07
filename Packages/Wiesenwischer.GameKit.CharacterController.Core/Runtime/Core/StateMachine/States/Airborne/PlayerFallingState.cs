@@ -57,7 +57,13 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.StateMachine.States
 
             if (shouldLand)
             {
-                ReusableData.LandingVelocity = ReusableData.VerticalVelocity;
+                // Landing-Klassifikation über Fall-Distanz statt akkumulierte VerticalVelocity.
+                // VerticalVelocity ist durch Erkennungs-Latenz aufgebläht (Gravity wird 1-2 Ticks
+                // nach tatsächlichem Bodenkontakt weiter angewendet).
+                // Umrechnung in äquivalente Geschwindigkeit: v = sqrt(2*g*d)
+                float effectiveFallDistance = Mathf.Max(0f, fallDistance);
+                float landingSpeed = Mathf.Sqrt(2f * Config.Gravity * effectiveFallDistance);
+                ReusableData.LandingVelocity = -landingSpeed;
 
                 if (_jumpBuffered)
                 {
@@ -65,7 +71,7 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.StateMachine.States
                     ReusableData.JumpPressed = true;
                     ChangeState(stateMachine.JumpingState);
                 }
-                else if (Mathf.Abs(ReusableData.LandingVelocity) >= Config.HardLandingThreshold)
+                else if (landingSpeed >= Config.HardLandingThreshold)
                 {
                     ChangeState(stateMachine.HardLandingState);
                 }
