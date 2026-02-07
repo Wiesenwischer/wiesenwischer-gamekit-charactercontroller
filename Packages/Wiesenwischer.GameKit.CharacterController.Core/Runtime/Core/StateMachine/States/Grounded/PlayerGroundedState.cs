@@ -90,11 +90,24 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.StateMachine.States
 
         protected override void OnPhysicsUpdate(float deltaTime)
         {
-            // Grounding-Velocity: Kleine negative Velocity hält Character am Boden
-            // (verhindert Schweben auf Rampen und bei Ground Snapping)
-            if (ReusableData.VerticalVelocity <= 0)
+            if (ReusableData.IsGrounded)
             {
-                ReusableData.VerticalVelocity = -2f;
+                // Grounding-Velocity: Kleine negative Velocity hält Character am Boden
+                // (verhindert Schweben auf Rampen und bei Ground Snapping)
+                if (ReusableData.VerticalVelocity <= 0)
+                {
+                    ReusableData.VerticalVelocity = -2f;
+                }
+            }
+            else
+            {
+                // Coyote Time: Nicht mehr am Boden, aber noch im GroundedState.
+                // Gravity normal anwenden, damit der Character visuell sofort fällt.
+                ReusableData.VerticalVelocity -= Config.Gravity * deltaTime;
+                if (ReusableData.VerticalVelocity < -Config.MaxFallSpeed)
+                {
+                    ReusableData.VerticalVelocity = -Config.MaxFallSpeed;
+                }
             }
         }
 
