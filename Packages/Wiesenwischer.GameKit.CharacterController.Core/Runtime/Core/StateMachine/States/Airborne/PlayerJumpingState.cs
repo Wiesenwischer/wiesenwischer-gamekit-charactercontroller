@@ -12,6 +12,13 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.StateMachine.States
         private readonly JumpModule _jumpModule = new JumpModule();
         private const float CeilingCheckDistance = 0.1f;
 
+        /// <summary>
+        /// Ob der Jump-Impulse vom Motor bestätigt wurde (VerticalVelocity > 0).
+        /// Verhindert vorzeitige IsFalling-Transition durch Sync-Back-Lag
+        /// zwischen Intent-System (TickSystem 60Hz) und Motor (FixedUpdate ~50Hz).
+        /// </summary>
+        private bool _jumpImpulseConfirmed;
+
         public override string StateName => "Jumping";
 
         public PlayerJumpingState(PlayerMovementStateMachine stateMachine) : base(stateMachine)
@@ -25,16 +32,19 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.StateMachine.States
             // Intent: Jump anmelden - CharacterLocomotion wendet den Impulse an
             ReusableData.JumpRequested = true;
             ReusableData.JumpButtonReleased = false;
+            _jumpImpulseConfirmed = false;
         }
 
         protected override void OnHandleInput()
         {
+            base.OnHandleInput();
+
             // Variable Jump: Nur wenn aktiviert
             if (!Config.UseVariableJump) return;
 
             // Intent: Jump Cut anmelden wenn Button während Aufstieg losgelassen
             if (!ReusableData.JumpHeld && !ReusableData.JumpButtonReleased
-                && ReusableData.VerticalVelocity > 0)
+                && _jumpImpulseConfirmed && ReusableData.VerticalVelocity > 0)
             {
                 ReusableData.JumpCutRequested = true;
                 ReusableData.JumpButtonReleased = true;
@@ -44,6 +54,18 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.StateMachine.States
         protected override void OnUpdate()
         {
             base.OnUpdate();
+
+            // Warte bis der Motor den Jump-Impulse verarbeitet hat.
+            // Ohne diese Prüfung sieht IsFalling() den alten VerticalVelocity-Wert
+            // (z.B. -2f GroundingVelocity) und transitioniert sofort zu Falling.
+            if (!_jumpImpulseConfirmed)
+            {
+                if (ReusableData.VerticalVelocity > 0f)
+                {
+                    _jumpImpulseConfirmed = true;
+                }
+                return;
+            }
 
             // Transition zu Falling wenn wir anfangen zu fallen
             if (_jumpModule.IsFalling(ReusableData.VerticalVelocity))

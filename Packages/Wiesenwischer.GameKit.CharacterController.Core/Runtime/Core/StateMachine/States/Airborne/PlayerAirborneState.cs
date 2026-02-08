@@ -31,6 +31,18 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.StateMachine.States
             }
         }
 
+        protected override void OnHandleInput()
+        {
+            // JumpWasReleased auch in der Luft tracken.
+            // Ohne dieses Tracking bleibt JumpWasReleased=false nach der Landung,
+            // wenn der Spieler den Button während des Flugs losgelassen hat,
+            // und der nächste Jump wird von CanJump() blockiert.
+            if (!ReusableData.JumpHeld)
+            {
+                ReusableData.JumpWasReleased = true;
+            }
+        }
+
         protected override void OnUpdate()
         {
             // Modifier wird NICHT überschrieben - Momentum aus dem Grounded State bleibt erhalten.
