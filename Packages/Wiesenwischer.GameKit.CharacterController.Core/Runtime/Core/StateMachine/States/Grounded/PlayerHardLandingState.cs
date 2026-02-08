@@ -38,8 +38,8 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.StateMachine.States
                 _landingRecoveryTimer = Config.HardLandingDuration;
             }
 
-            // Bewegung komplett stoppen
-            ReusableData.HorizontalVelocity = Vector3.zero;
+            // Intent: Keine Bewegung während Recovery
+            // AccelerationModule bremst über Deceleration ab (kein direkter Velocity-Reset)
             ReusableData.MovementSpeedModifier = 0f;
         }
 
