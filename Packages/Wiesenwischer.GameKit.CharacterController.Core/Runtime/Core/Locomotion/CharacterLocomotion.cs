@@ -20,15 +20,10 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.Locomotion
         private readonly GroundDetectionModule _groundDetectionModule;
         private readonly GravityModule _gravityModule;
 
-        // Input für den aktuellen Frame
+        // Input für den aktuellen Frame.
+        // One-Shot Intent-Flags (Jump, JumpCut, ResetVerticalVelocity) werden per OR
+        // akkumuliert und erst in UpdateVelocity() konsumiert/gecleart.
         private LocomotionInput _currentInput;
-
-        // Akkumulierte One-Shot Intent-Flags.
-        // TickSystem (60Hz) kann schneller feuern als Motor FixedUpdate (~50Hz).
-        // Ohne Akkumulation wird z.B. Jump=true durch den nächsten Simulate(Jump=false) überschrieben.
-        private bool _pendingJump;
-        private bool _pendingJumpCut;
-        private bool _pendingResetVertical;
 
         // Cached horizontal velocity (aus UpdateVelocity, für Rotation + Debug)
         private Vector3 _lastComputedHorizontal;
@@ -104,16 +99,15 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.Locomotion
 
         public void Simulate(LocomotionInput input, float deltaTime)
         {
-            // Speichere Input für die Motor-Callbacks
-            _currentInput = input;
-
-            // One-Shot Intent-Flags akkumulieren statt überschreiben.
+            // One-Shot Intent-Flags akkumulieren bevor der Rest überschrieben wird.
             // TickSystem (60Hz) kann schneller feuern als Motor FixedUpdate (~50Hz).
-            // Ohne Akkumulation geht z.B. Jump=true verloren wenn der nächste
+            // Ohne OR-Akkumulation geht z.B. Jump=true verloren wenn der nächste
             // Simulate-Aufruf Jump=false setzt bevor der Motor UpdateVelocity() aufruft.
-            if (input.Jump) _pendingJump = true;
-            if (input.JumpCut) _pendingJumpCut = true;
-            if (input.ResetVerticalVelocity) _pendingResetVertical = true;
+            input.Jump |= _currentInput.Jump;
+            input.JumpCut |= _currentInput.JumpCut;
+            input.ResetVerticalVelocity |= _currentInput.ResetVerticalVelocity;
+
+            _currentInput = input;
         }
 
         public void SetPositionAndRotation(Vector3 position, Quaternion rotation)
@@ -207,27 +201,29 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.Locomotion
             // Locomotion ist Owner der vertikalen Velocity.
             // States setzen Intent (Jump, JumpCut, ResetVertical), hier wird Physik berechnet.
 
-            // 1. Jump-Impulse verarbeiten (akkumuliertes Flag)
-            if (_pendingJump)
+            // 1. Jump-Impulse verarbeiten
+            if (_currentInput.Jump)
             {
-                _pendingJump = false;
                 _verticalVelocity = GetJumpVelocity();
                 _motor.ForceUnground(0.1f);
             }
 
-            // 2. Variable Jump Cut (akkumuliertes Flag)
-            if (_pendingJumpCut && _verticalVelocity > 0f)
+            // 2. Variable Jump Cut (Button früh losgelassen)
+            if (_currentInput.JumpCut && _verticalVelocity > 0f)
             {
-                _pendingJumpCut = false;
                 _verticalVelocity *= JumpModule.DefaultJumpCutMultiplier;
             }
 
-            // 3. Vertical Reset (akkumuliertes Flag)
-            if (_pendingResetVertical)
+            // 3. Vertical Reset (Ceiling Hit etc.)
+            if (_currentInput.ResetVerticalVelocity)
             {
-                _pendingResetVertical = false;
                 _verticalVelocity = 0f;
             }
+
+            // One-Shot Flags konsumieren (wurden per OR akkumuliert in Simulate)
+            _currentInput.Jump = false;
+            _currentInput.JumpCut = false;
+            _currentInput.ResetVerticalVelocity = false;
 
             // 4. Gravity via GravityModule (Single Source of Truth)
             _verticalVelocity = _gravityModule.CalculateVerticalVelocity(
