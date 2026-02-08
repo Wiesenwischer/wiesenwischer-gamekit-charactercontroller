@@ -23,6 +23,13 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.Locomotion
         // Input für den aktuellen Frame
         private LocomotionInput _currentInput;
 
+        // Akkumulierte One-Shot Intent-Flags.
+        // TickSystem (60Hz) kann schneller feuern als Motor FixedUpdate (~50Hz).
+        // Ohne Akkumulation wird z.B. Jump=true durch den nächsten Simulate(Jump=false) überschrieben.
+        private bool _pendingJump;
+        private bool _pendingJumpCut;
+        private bool _pendingResetVertical;
+
         // Cached horizontal velocity (aus UpdateVelocity, für Rotation + Debug)
         private Vector3 _lastComputedHorizontal;
 
@@ -100,12 +107,13 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.Locomotion
             // Speichere Input für die Motor-Callbacks
             _currentInput = input;
 
-            // Der Motor wird automatisch vom CharacterMotorSystem aktualisiert
-            // (in FixedUpdate). Die Locomotion-Logik passiert in den Callbacks.
-
-            // Falls manuelle Simulation gewünscht ist (z.B. für Server-Side):
-            // _motor.UpdatePhase1(deltaTime);
-            // _motor.UpdatePhase2(deltaTime);
+            // One-Shot Intent-Flags akkumulieren statt überschreiben.
+            // TickSystem (60Hz) kann schneller feuern als Motor FixedUpdate (~50Hz).
+            // Ohne Akkumulation geht z.B. Jump=true verloren wenn der nächste
+            // Simulate-Aufruf Jump=false setzt bevor der Motor UpdateVelocity() aufruft.
+            if (input.Jump) _pendingJump = true;
+            if (input.JumpCut) _pendingJumpCut = true;
+            if (input.ResetVerticalVelocity) _pendingResetVertical = true;
         }
 
         public void SetPositionAndRotation(Vector3 position, Quaternion rotation)
@@ -199,22 +207,25 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.Locomotion
             // Locomotion ist Owner der vertikalen Velocity.
             // States setzen Intent (Jump, JumpCut, ResetVertical), hier wird Physik berechnet.
 
-            // 1. Jump-Impulse verarbeiten
-            if (_currentInput.Jump)
+            // 1. Jump-Impulse verarbeiten (akkumuliertes Flag)
+            if (_pendingJump)
             {
+                _pendingJump = false;
                 _verticalVelocity = GetJumpVelocity();
                 _motor.ForceUnground(0.1f);
             }
 
-            // 2. Variable Jump Cut (Button früh losgelassen)
-            if (_currentInput.JumpCut && _verticalVelocity > 0f)
+            // 2. Variable Jump Cut (akkumuliertes Flag)
+            if (_pendingJumpCut && _verticalVelocity > 0f)
             {
+                _pendingJumpCut = false;
                 _verticalVelocity *= JumpModule.DefaultJumpCutMultiplier;
             }
 
-            // 3. Vertical Reset (Ceiling Hit etc.)
-            if (_currentInput.ResetVerticalVelocity)
+            // 3. Vertical Reset (akkumuliertes Flag)
+            if (_pendingResetVertical)
             {
+                _pendingResetVertical = false;
                 _verticalVelocity = 0f;
             }
 
