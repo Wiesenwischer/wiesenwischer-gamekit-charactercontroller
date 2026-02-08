@@ -81,6 +81,23 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.Tests.StateMachine
         }
 
         [Test]
+        public void ResetTemporaryData_ClearsIntentFlags()
+        {
+            // Arrange
+            _reusableData.JumpRequested = true;
+            _reusableData.JumpCutRequested = true;
+            _reusableData.ResetVerticalRequested = true;
+
+            // Act
+            _reusableData.ResetTemporaryData();
+
+            // Assert
+            Assert.IsFalse(_reusableData.JumpRequested);
+            Assert.IsFalse(_reusableData.JumpCutRequested);
+            Assert.IsFalse(_reusableData.ResetVerticalRequested);
+        }
+
+        [Test]
         public void ResetMovementData_ClearsVelocitiesAndModifiers()
         {
             // Arrange
