@@ -12,6 +12,13 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.StateMachine.States
         private readonly JumpModule _jumpModule = new JumpModule();
         private const float CeilingCheckDistance = 0.1f;
 
+        /// <summary>
+        /// Ob der Jump-Impulse vom Motor bestätigt wurde (VerticalVelocity > 0).
+        /// Verhindert vorzeitige IsFalling-Transition durch Sync-Back-Lag
+        /// zwischen Intent-System (TickSystem 60Hz) und Motor (FixedUpdate ~50Hz).
+        /// </summary>
+        private bool _jumpImpulseConfirmed;
+
         public override string StateName => "Jumping";
 
         public PlayerJumpingState(PlayerMovementStateMachine stateMachine) : base(stateMachine)
@@ -22,31 +29,43 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.StateMachine.States
         {
             base.OnEnter();
 
-            // Berechne und setze Jump Velocity via JumpModule
-            ReusableData.VerticalVelocity = _jumpModule.CalculateJumpVelocity(
-                Config.JumpHeight,
-                Config.Gravity);
+            // Intent: Jump anmelden - CharacterLocomotion wendet den Impulse an
+            ReusableData.JumpRequested = true;
             ReusableData.JumpButtonReleased = false;
+            _jumpImpulseConfirmed = false;
         }
 
         protected override void OnHandleInput()
         {
+            base.OnHandleInput();
+
             // Variable Jump: Nur wenn aktiviert
             if (!Config.UseVariableJump) return;
 
-            // JumpModule handhabt Variable Jump Logik
-            var (velocity, released) = _jumpModule.ApplyVariableJump(
-                ReusableData.VerticalVelocity,
-                ReusableData.JumpHeld,
-                ReusableData.JumpButtonReleased);
-
-            ReusableData.VerticalVelocity = velocity;
-            ReusableData.JumpButtonReleased = released;
+            // Intent: Jump Cut anmelden wenn Button während Aufstieg losgelassen
+            if (!ReusableData.JumpHeld && !ReusableData.JumpButtonReleased
+                && _jumpImpulseConfirmed && ReusableData.VerticalVelocity > 0)
+            {
+                ReusableData.JumpCutRequested = true;
+                ReusableData.JumpButtonReleased = true;
+            }
         }
 
         protected override void OnUpdate()
         {
             base.OnUpdate();
+
+            // Warte bis der Motor den Jump-Impulse verarbeitet hat.
+            // Ohne diese Prüfung sieht IsFalling() den alten VerticalVelocity-Wert
+            // (z.B. -2f GroundingVelocity) und transitioniert sofort zu Falling.
+            if (!_jumpImpulseConfirmed)
+            {
+                if (ReusableData.VerticalVelocity > 0f)
+                {
+                    _jumpImpulseConfirmed = true;
+                }
+                return;
+            }
 
             // Transition zu Falling wenn wir anfangen zu fallen
             if (_jumpModule.IsFalling(ReusableData.VerticalVelocity))
@@ -55,11 +74,12 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.StateMachine.States
                 return;
             }
 
-            // Ceiling Detection via JumpModule
+            // Ceiling Detection via JumpModule (Sensing bleibt im State)
             var motor = stateMachine.Player.CharacterMotor;
             if (stateTime > 0.05f && _jumpModule.CheckCeiling(motor, CeilingCheckDistance, Config.GroundLayers))
             {
-                ReusableData.VerticalVelocity = 0f;
+                // Intent: Vertical Reset anmelden - CharacterLocomotion setzt _verticalVelocity = 0
+                ReusableData.ResetVerticalRequested = true;
                 ChangeState(stateMachine.FallingState);
             }
         }

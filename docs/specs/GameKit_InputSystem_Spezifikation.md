@@ -6,6 +6,13 @@ Diese Spezifikation beschreibt den Aufbau eines modularen Input-Systems basieren
 
 ---
 
+## 🔗 Verwandte Spezifikationen
+
+- [AAA Action Combat & Character Architecture](AAA_Action_Combat_Character_Architecture.md) – Intent System: Input → Intent → State Machine
+- [Master Architecture Overview](Wiesenwischer_Gamekit_Master_Architecture.md) – Player-Architektur und Input-Einordnung
+
+---
+
 ## 🎯 Ziele
 
 - Unterstützung für Unity Input System (`InputActionAsset`)

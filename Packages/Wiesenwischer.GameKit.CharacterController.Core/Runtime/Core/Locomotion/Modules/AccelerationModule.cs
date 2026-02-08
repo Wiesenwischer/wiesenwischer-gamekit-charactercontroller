@@ -15,7 +15,8 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.Locomotion.Modules
         /// <param name="targetVelocity">Ziel-Velocity basierend auf Input</param>
         /// <param name="acceleration">Beschleunigung beim Bewegen</param>
         /// <param name="deceleration">Abbremsen beim Stoppen</param>
-        /// <param name="airControl">Multiplikator für Luftkontrolle (0-1)</param>
+        /// <param name="airControl">Multiplikator für Steuerbarkeit in der Luft (0-1)</param>
+        /// <param name="airDrag">Multiplikator für Momentum-Verlust in der Luft (0-1)</param>
         /// <param name="isGrounded">Ist der Character am Boden?</param>
         /// <param name="deltaTime">Zeit seit letztem Frame</param>
         /// <returns>Neue horizontale Velocity</returns>
@@ -25,6 +26,20 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.Locomotion.Modules
             float acceleration,
             float deceleration,
             float airControl,
+<<<<<<< HEAD
+            float airDrag,
+            bool isGrounded,
+            float deltaTime)
+        {
+            bool hasInput = targetVelocity.sqrMagnitude > 0.01f;
+            float accel = hasInput ? acceleration : deceleration;
+
+            if (!isGrounded)
+            {
+                // AirControl: Steuerbarkeit (Beschleunigung Richtung Input)
+                // AirDrag: Momentum-Verlust (Abbremsung ohne Input)
+                accel *= hasInput ? airControl : airDrag;
+=======
             bool isGrounded,
             float deltaTime)
         {
@@ -35,6 +50,7 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.Locomotion.Modules
             if (!isGrounded)
             {
                 accel *= airControl;
+>>>>>>> origin/main
             }
 
             return Vector3.MoveTowards(currentVelocity, targetVelocity, accel * deltaTime);

@@ -272,8 +272,8 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.Tests.Locomotion
             // Assert
             Assert.AreEqual(Vector2.zero, input.MoveDirection);
             Assert.AreEqual(Vector3.forward, input.LookDirection);
-            Assert.AreEqual(0f, input.VerticalVelocity);
             Assert.AreEqual(1f, input.SpeedModifier);
+            Assert.IsFalse(input.StepDetectionEnabled);
         }
 
         [Test]
@@ -284,15 +284,15 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.Tests.Locomotion
             {
                 MoveDirection = new Vector2(0.5f, 0.5f),
                 LookDirection = Vector3.right,
-                VerticalVelocity = 5f,
-                SpeedModifier = 2f
+                SpeedModifier = 2f,
+                StepDetectionEnabled = true
             };
 
             // Assert
             Assert.AreEqual(new Vector2(0.5f, 0.5f), input.MoveDirection);
             Assert.AreEqual(Vector3.right, input.LookDirection);
-            Assert.AreEqual(5f, input.VerticalVelocity);
             Assert.AreEqual(2f, input.SpeedModifier);
+            Assert.IsTrue(input.StepDetectionEnabled);
         }
 
         #endregion
@@ -475,7 +475,10 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.Tests.Locomotion
             public float RunSpeed { get; set; } = 10f;
             public float Acceleration { get; set; } = 10f;
             public float Deceleration { get; set; } = 10f;
+            public float SprintMultiplier { get; set; } = 1.5f;
             public float AirControl { get; set; } = 0.3f;
+            public float AirDrag { get; set; } = 0.8f;
+            public float MinFallDistance { get; set; } = 0.5f;
             public float Gravity { get; set; } = 20f;
             public float MaxFallSpeed { get; set; } = 50f;
             public float JumpHeight { get; set; } = 2f;

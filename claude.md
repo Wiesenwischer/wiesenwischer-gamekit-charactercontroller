@@ -29,6 +29,10 @@ Das Ziel ist die Entwicklung eines **modularen, MMO-fähigen Unity GameKit Frame
 | `BuildSystem_*.md` | Konzeptionen für ein modulares Bausystem |
 | `UnityRepo_CompleteSetup.md` | Repository-Setup inkl. Git, LFS, Release, Versionierung |
 | `GameKit_MMO_Basics.md` | Wichtige MMO-Grundlagen und Design-Prinzipien |
+| `AAA_Action_Combat_Character_Architecture.md` | Character-Intent-State-Architektur, Action Combat, Animation Layers |
+| `Wiesenwischer_Gamekit_Master_Architecture.md` | System-Architektur (CoreRoot, Multi-Scene, Streaming, Player) |
+| `Wiesenwischer_Gamekit_World_Architecture.md` | World-Architektur (Terrain, Weather, Claims, Zones, WorldState) |
+| `Wiesenwischer_Gamekit_World_Architecture_MASTER.md` | Erweiterte World-Architektur mit Adapters, Commands, Package-Grenzen |
 
 ---
 
@@ -49,6 +53,71 @@ Das Ziel ist die Entwicklung eines **modularen, MMO-fähigen Unity GameKit Frame
 - Bestehende Spezifikationen (Markdown) erweitern, nie überschreiben
 - Diagramme, JSON-Templates oder API-Contracts erzeugen, wenn gewünscht
 - Für jede Änderung verständliche Commits oder Patches erzeugen
+
+---
+
+## 📋 Implementierungs-Richtlinien
+
+### Vor jeder Implementierung (PFLICHT)
+
+1. **Dokumentation prüfen**
+   - Implementierungsplan lesen: `docs/implementation/README.md`
+   - Phase-spezifische Docs lesen: `docs/implementation/phase-X-*/`
+   - Aktuelle Phase muss vollständig ausgearbeitet sein
+
+2. **Architektur-Review**
+   - Bestehenden Code verstehen bevor Änderungen gemacht werden
+   - Relevante Dateien lesen und Struktur nachvollziehen
+   - Abhängigkeiten zwischen Komponenten prüfen
+
+3. **Offene Punkte klären**
+   - Bei Unklarheiten: **IMMER** beim User nachfragen
+   - Keine Annahmen treffen bei wichtigen Design-Entscheidungen
+   - Alternativen aufzeigen und Empfehlung geben
+
+### Während der Implementierung
+
+1. **Branch pro Phase**
+   - Format: `feature/phase-X-beschreibung`
+   - Von `main` abzweigen
+
+2. **Commit pro Schritt**
+   - Format: `feat(phase-X): X.Y Beschreibung`
+   - Kleine, atomare Commits
+   - **KEINE** Claude-Footer in Commits (kein "Co-Authored-By")
+
+3. **Tests schreiben**
+   - Jede neue Funktionalität sollte getestet werden
+   - Unit Tests für Module/Klassen
+   - Integration Tests für Zusammenspiel
+   - Tests VOR oder WÄHREND der Implementierung, nicht danach
+
+4. **Pull Requests**
+   - **KEINE** Claude-Footer oder Attributions
+   - Klare Beschreibung was gemacht wurde
+   - Test-Plan mit Checkliste
+
+### Nach der Implementierung
+
+1. **Kompilierung prüfen**
+   ```bash
+   powershell -Command "Get-Content 'C:\Users\marcu\AppData\Local\Unity\Editor\Editor.log' -Tail 100 | Select-String -Pattern 'error|CS\d{4}'"
+   ```
+
+2. **Tests ausführen**
+   - Alle Tests müssen grün sein
+   - Neue Tests für neue Funktionalität
+
+3. **Dokumentation aktualisieren**
+   - Tracking-Checkboxen abhaken
+   - Datum eintragen wenn relevant
+
+### Slash Commands
+
+Für die Implementierung stehen zwei Befehle zur Verfügung:
+
+- `/plan-phase` - Nächste nicht-ausgearbeitete Phase finden und detaillieren
+- `/impl-next` - Aktuellen Fortschritt ermitteln und nächsten Schritt implementieren
 
 ---
 

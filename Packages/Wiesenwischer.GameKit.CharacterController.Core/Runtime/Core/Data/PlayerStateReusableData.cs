@@ -45,9 +45,6 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.Data
         /// <summary>Movement Speed Modifier (z.B. 1.0 für Walk, 1.5 für Run).</summary>
         public float MovementSpeedModifier { get; set; } = 1f;
 
-        /// <summary>Deceleration Force Modifier.</summary>
-        public float MovementDecelerationForce { get; set; } = 1f;
-
         #endregion
 
         #region Ground State
@@ -94,6 +91,29 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.Data
 
         #endregion
 
+        #region Movement Intent (One-Shot Flags)
+
+        /// <summary>
+        /// Jump-Intent. Wird vom JumpingState gesetzt, von PlayerController konsumiert.
+        /// CharacterLocomotion wendet den Jump-Impulse an.
+        /// </summary>
+        public bool JumpRequested { get; set; }
+
+        /// <summary>
+        /// Variable Jump Cut Intent. Wird gesetzt wenn der Jump-Button
+        /// während des Aufstiegs losgelassen wird.
+        /// CharacterLocomotion reduziert die aufwärts-Velocity.
+        /// </summary>
+        public bool JumpCutRequested { get; set; }
+
+        /// <summary>
+        /// Setzt die vertikale Velocity auf 0 (z.B. bei Ceiling Hit).
+        /// CharacterLocomotion setzt _verticalVelocity = 0.
+        /// </summary>
+        public bool ResetVerticalRequested { get; set; }
+
+        #endregion
+
         #region Rotation State (ref für Performance bei Structs)
 
         private Vector3 _currentTargetRotation;
@@ -129,6 +149,9 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.Data
             JumpPressed = false;
             DashPressed = false;
             JumpButtonReleased = false;
+            JumpRequested = false;
+            JumpCutRequested = false;
+            ResetVerticalRequested = false;
         }
 
         /// <summary>
@@ -139,7 +162,6 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.Data
             VerticalVelocity = 0f;
             HorizontalVelocity = Vector3.zero;
             MovementSpeedModifier = 1f;
-            MovementDecelerationForce = 1f;
         }
 
         /// <summary>

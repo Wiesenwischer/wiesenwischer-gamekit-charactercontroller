@@ -56,11 +56,32 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.Locomotion
         /// </summary>
         /// <param name="velocity">Die anzuwendende Geschwindigkeit.</param>
         void ApplyVelocity(Vector3 velocity);
+
+        #region Movement Events
+
+        /// <summary>
+        /// Fordert einen Sprung an. Wird intern akkumuliert bis der Motor konsumiert.
+        /// </summary>
+        void RequestJump();
+
+        /// <summary>
+        /// Fordert einen Variable Jump Cut an (Button früh losgelassen).
+        /// Reduziert aufwärts-Velocity wenn noch im Aufstieg.
+        /// </summary>
+        void RequestJumpCut();
+
+        /// <summary>
+        /// Setzt die vertikale Velocity auf 0 (z.B. bei Ceiling Hit).
+        /// </summary>
+        void RequestResetVertical();
+
+        #endregion
     }
 
     /// <summary>
-    /// Struct für Locomotion Input.
-    /// Enthält alle Eingaben, die für die Bewegung relevant sind.
+    /// Struct für kontinuierlichen Locomotion Input.
+    /// Enthält nur Daten die jeden Frame aktualisiert werden (latest-value-wins).
+    /// Events (Jump, JumpCut etc.) gehen über separate Request-Methoden auf ILocomotionController.
     /// </summary>
     public struct LocomotionInput
     {
@@ -74,12 +95,6 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.Locomotion
         /// Blickrichtung in Weltkoordinaten (für Rotation).
         /// </summary>
         public Vector3 LookDirection;
-
-        /// <summary>
-        /// Die vertikale Geschwindigkeit (für Gravity/Jump).
-        /// Wird vom State Machine gesetzt.
-        /// </summary>
-        public float VerticalVelocity;
 
         /// <summary>
         /// Ob Step Detection aktiv sein soll.
@@ -100,7 +115,6 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.Locomotion
         {
             MoveDirection = Vector2.zero,
             LookDirection = Vector3.forward,
-            VerticalVelocity = 0f,
             StepDetectionEnabled = false,
             SpeedModifier = 1f
         };

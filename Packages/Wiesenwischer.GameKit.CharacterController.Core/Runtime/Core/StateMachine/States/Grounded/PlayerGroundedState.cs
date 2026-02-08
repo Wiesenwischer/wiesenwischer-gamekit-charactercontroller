@@ -16,8 +16,8 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.StateMachine.States
 
         protected override void OnEnter()
         {
-            // Reset vertical velocity when landing
-            ReusableData.VerticalVelocity = 0f;
+            // VerticalVelocity wird NICHT mehr hier resettet - CharacterLocomotion
+            // handhabt das via GravityModule (GroundingVelocity wenn grounded).
             ReusableData.TimeSinceGrounded = 0f;
 
             // Step Detection aktivieren für Grounded States
@@ -74,12 +74,12 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.StateMachine.States
                 {
                     ReusableData.LastGroundedY = currentY;
                 }
-                // Bei kleinem Drop (eine Stufe runter): auch aktualisieren
-                else if (fallDistance <= Config.MaxStepHeight)
+                // Bei kleinem Drop (unter MinFallDistance): auch aktualisieren
+                else if (fallDistance <= Config.MinFallDistance)
                 {
                     ReusableData.LastGroundedY = currentY;
                 }
-                // Bei großem Drop: Zu Falling wechseln
+                // Bei großem Drop (>= MinFallDistance): Zu Falling wechseln
                 else if (ReusableData.TimeSinceGrounded > Config.CoyoteTime)
                 {
                     ChangeState(stateMachine.FallingState);
@@ -90,8 +90,10 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.StateMachine.States
 
         protected override void OnPhysicsUpdate(float deltaTime)
         {
-            // Grounding-Velocity (-2f) wird von CharacterLocomotion gesetzt
-            // States setzen nur positive Velocity (Jump-Force)
+            // Grounding-Velocity und Gravity werden von CharacterLocomotion gehandhabt.
+            // GravityModule.CalculateVerticalVelocity() macht beides:
+            // - Grounded + nicht aufwärts → GroundingVelocity (-2f)
+            // - Nicht grounded (Coyote Time) → Gravity anwenden + MaxFallSpeed clamping
         }
 
         /// <summary>

@@ -4,6 +4,13 @@ Dieses Dokument beschreibt ein modulares und erweiterbares Animationskonzept fü
 
 ---
 
+## 🔗 Verwandte Spezifikationen
+
+- [AAA Action Combat & Character Architecture](AAA_Action_Combat_Character_Architecture.md) – Theoretische Grundlage für das 3-Schichten-Modell (Movement / Ability / Status Layer) und das Priority-System
+- [Modulare Fertigkeiten Controller v2](ModularFertigkeitenController_Spezifikation_v2.md) – Controller-Architektur und IAbility Interface
+
+---
+
 ## 🎯 Zielsetzung
 
 - Fähigkeit zur Kombination von Bewegung + Fähigkeit

@@ -122,7 +122,13 @@ namespace Wiesenwischer.GameKit.CharacterController.Core
             // 2. State Machine Update (HandleInput + Update)
             _movementStateMachine?.Update();
 
-            // 3. Tick System aktualisieren
+            // 3. Events direkt an Locomotion weiterleiten (vor TickSystem).
+            // Events sind One-Shot und dürfen nicht durch den TickSystem-Bottleneck,
+            // weil Simulate() per Overwrite arbeitet (latest-value-wins für kontinuierliche Daten).
+            // RequestXxx() setzt intern ein Flag das bis zum nächsten Motor FixedUpdate bleibt.
+            ConsumeMovementEvents();
+
+            // 4. Tick System aktualisieren (nur kontinuierlicher Input)
             _tickSystem?.Update(Time.deltaTime);
         }
 
@@ -267,29 +273,52 @@ namespace Wiesenwischer.GameKit.CharacterController.Core
         }
 
         /// <summary>
+        /// Leitet One-Shot Events von ReusableData an Locomotion weiter.
+        /// Wird in Update() aufgerufen (vor TickSystem), damit Events nicht
+        /// durch den TickSystem/Simulate()-Bottleneck verloren gehen.
+        /// </summary>
+        private void ConsumeMovementEvents()
+        {
+            if (Locomotion == null || ReusableData == null) return;
+
+            if (ReusableData.JumpRequested)
+            {
+                Locomotion.RequestJump();
+                ReusableData.JumpRequested = false;
+            }
+            if (ReusableData.JumpCutRequested)
+            {
+                Locomotion.RequestJumpCut();
+                ReusableData.JumpCutRequested = false;
+            }
+            if (ReusableData.ResetVerticalRequested)
+            {
+                Locomotion.RequestResetVertical();
+                ReusableData.ResetVerticalRequested = false;
+            }
+        }
+
+        /// <summary>
         /// Wendet Bewegung über Locomotion an.
+        /// Nur kontinuierlicher Input - Events gehen über ConsumeMovementEvents().
         /// </summary>
         private void ApplyMovement(float deltaTime)
         {
             if (Locomotion == null || ReusableData == null) return;
 
-            // Create locomotion input from ReusableData
-            // SpeedModifier wird vom State gesetzt (0=Idle, 1=Walk, 2=Run, AirControl=Airborne)
             var input = new LocomotionInput
             {
                 MoveDirection = ReusableData.MoveInput,
                 LookDirection = GetCameraForward(),
-                VerticalVelocity = ReusableData.VerticalVelocity,
+                SpeedModifier = ReusableData.MovementSpeedModifier,
                 StepDetectionEnabled = ReusableData.StepDetectionEnabled,
-                SpeedModifier = ReusableData.MovementSpeedModifier
             };
 
-            // Simulate locomotion
             Locomotion.Simulate(input, deltaTime);
 
-            // Sync velocities back to ReusableData
-            ReusableData.VerticalVelocity = Locomotion.VerticalVelocity;
+            // Sync-Back: Locomotion → ReusableData
             ReusableData.HorizontalVelocity = Locomotion.HorizontalVelocity;
+            ReusableData.VerticalVelocity = Locomotion.VerticalVelocity;
         }
 
         /// <summary>

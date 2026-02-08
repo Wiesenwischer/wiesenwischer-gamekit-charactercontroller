@@ -16,15 +16,23 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.Locomotion
         private readonly ILocomotionConfig _config;
 
         // Module
-        private readonly GravityModule _gravityModule;
         private readonly AccelerationModule _accelerationModule;
         private readonly GroundDetectionModule _groundDetectionModule;
+        private readonly GravityModule _gravityModule;
 
-        // Input für den aktuellen Frame
+        // Kontinuierlicher Input (latest-value-wins, Overwrite = korrekt)
         private LocomotionInput _currentInput;
 
-        // Velocity state
-        private Vector3 _horizontalVelocity;
+        // Event-Flags (intern akkumuliert, konsumiert in UpdateVelocity)
+        private bool _jumpRequested;
+        private bool _jumpCutRequested;
+        private bool _resetVerticalRequested;
+
+        // Cached horizontal velocity (aus UpdateVelocity, für Rotation + Debug)
+        private Vector3 _lastComputedHorizontal;
+
+        // Vertical Velocity: Locomotion ist Owner (Intent System Pattern)
+        // States setzen Intent (Jump, JumpCut, ResetVertical), Locomotion berechnet Physik.
         private float _verticalVelocity;
 
         // Rotation state
@@ -34,6 +42,9 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.Locomotion
         // Cached GroundInfo
         private GroundInfo _cachedGroundInfo;
 
+        // Debug: Frames nach Landung loggen
+        private int _debugLandingFrames;
+
         /// <summary>
         /// Erstellt eine neue CharacterLocomotion. Erwartet einen existierenden CharacterMotor.
         /// </summary>
@@ -41,7 +52,12 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.Locomotion
         {
             _motor = motor ?? throw new System.ArgumentNullException(nameof(motor));
             _config = config ?? throw new System.ArgumentNullException(nameof(config));
-            _transform = motor.Transform;
+            _transform = motor.transform;
+
+            // Module initialisieren
+            _accelerationModule = new AccelerationModule();
+            _groundDetectionModule = new GroundDetectionModule();
+            _gravityModule = new GravityModule();
 
             // Module initialisieren
             _gravityModule = new GravityModule();
@@ -91,15 +107,9 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.Locomotion
 
         public void Simulate(LocomotionInput input, float deltaTime)
         {
-            // Speichere Input für die Motor-Callbacks
+            // Nur kontinuierlicher Input - Overwrite ist korrekt (latest-value-wins).
+            // Events (Jump etc.) gehen über RequestJump() und werden intern akkumuliert.
             _currentInput = input;
-
-            // Der Motor wird automatisch vom CharacterMotorSystem aktualisiert
-            // (in FixedUpdate). Die Locomotion-Logik passiert in den Callbacks.
-
-            // Falls manuelle Simulation gewünscht ist (z.B. für Server-Side):
-            // _motor.UpdatePhase1(deltaTime);
-            // _motor.UpdatePhase2(deltaTime);
         }
 
         public void SetPositionAndRotation(Vector3 position, Quaternion rotation)
@@ -111,10 +121,14 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.Locomotion
 
         public void ApplyVelocity(Vector3 velocity)
         {
-            _horizontalVelocity = new Vector3(velocity.x, 0, velocity.z);
+            _lastComputedHorizontal = new Vector3(velocity.x, 0, velocity.z);
             _verticalVelocity = velocity.y;
             _motor.BaseVelocity = velocity;
         }
+
+        public void RequestJump() => _jumpRequested = true;
+        public void RequestJumpCut() => _jumpCutRequested = true;
+        public void RequestResetVertical() => _resetVerticalRequested = true;
 
         #endregion
 
@@ -133,9 +147,9 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.Locomotion
         public void UpdateRotation(ref Quaternion currentRotation, float deltaTime)
         {
             // Rotation zur Bewegungsrichtung
-            if (_config.RotateTowardsMovement && _horizontalVelocity.sqrMagnitude > 0.01f)
+            if (_config.RotateTowardsMovement && _lastComputedHorizontal.sqrMagnitude > 0.01f)
             {
-                Vector3 dir = _horizontalVelocity.normalized;
+                Vector3 dir = _lastComputedHorizontal.normalized;
                 _targetYaw = Mathf.Atan2(dir.x, dir.z) * Mathf.Rad2Deg;
                 _currentYaw = Mathf.MoveTowardsAngle(_currentYaw, _targetYaw, _config.RotationSpeed * deltaTime);
                 currentRotation = Quaternion.Euler(0, _currentYaw, 0);
@@ -144,6 +158,40 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.Locomotion
 
         public void UpdateVelocity(ref Vector3 currentVelocity, float deltaTime)
         {
+<<<<<<< HEAD
+            // === HORIZONTAL ===
+            // Zwei Quellen je nach Situation:
+            // - Am Boden: Motor's BaseVelocity (respektiert Wand-Kollisionen, Slope-Magnitude)
+            // - In der Luft: Letzte berechnete Velocity (Kollisionen mit Hinderniss-Kanten
+            //   sollen kein Momentum kosten, Step Handling ist aus)
+            Vector3 currentHorizontal;
+            if (_motor.GroundingStatus.IsStableOnGround)
+            {
+                // Am Boden: BaseVelocity ist slope-tangent-projiziert → hat Y-Komponente.
+                // Flache Richtung extrahieren, volle Speed beibehalten
+                // (GetDirectionTangentToSurface konserviert die Magnitude).
+                Vector3 flatDir = new Vector3(currentVelocity.x, 0f, currentVelocity.z);
+                float flatMag = flatDir.magnitude;
+                currentHorizontal = flatMag > 0.01f
+                    ? flatDir.normalized * currentVelocity.magnitude
+                    : Vector3.zero;
+            }
+            else
+            {
+                // In der Luft: AccelerationModule-Output vom letzten Frame.
+                // Motor's Kollisions-Auflösung (z.B. Capsule streift Hinderniss-Kante)
+                // wird physisch aufgelöst (keine Penetration), beeinflusst aber nicht
+                // die Velocity-Planung. So bleibt Momentum beim Landen erhalten.
+                currentHorizontal = _lastComputedHorizontal;
+            }
+
+            Vector3 targetHorizontal = _accelerationModule.CalculateTargetVelocity(
+                _currentInput.MoveDirection,
+                _currentInput.LookDirection,
+                _transform.forward,
+                _config.WalkSpeed,
+                _currentInput.SpeedModifier);
+=======
             // Horizontale Bewegung (via AccelerationModule)
             Vector3 targetHorizontal = _accelerationModule.CalculateTargetVelocity(
                 _currentInput.MoveDirection,
@@ -168,31 +216,107 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.Locomotion
                 _config.Gravity,
                 _config.MaxFallSpeed,
                 deltaTime);
+>>>>>>> origin/main
 
-            // ForceUnground wenn wir springen
-            if (_currentInput.VerticalVelocity > 0 && _verticalVelocity > 0)
+            Vector3 newHorizontal = _accelerationModule.CalculateHorizontalVelocity(
+                currentHorizontal,
+                targetHorizontal,
+                _config.Acceleration,
+                _config.Deceleration,
+                _config.AirControl,
+                _config.AirDrag,
+                _motor.GroundingStatus.IsStableOnGround,
+                deltaTime);
+
+            _lastComputedHorizontal = newHorizontal;
+
+            // === VERTICAL (Intent System) ===
+            // Locomotion ist Owner der vertikalen Velocity.
+            // States setzen Intent (Jump, JumpCut, ResetVertical), hier wird Physik berechnet.
+
+            // 1. Jump-Impulse verarbeiten
+            if (_jumpRequested)
+            {
+                _jumpRequested = false;
+                _verticalVelocity = GetJumpVelocity();
+                _motor.ForceUnground(0.1f);
+            }
+
+            // 2. Variable Jump Cut (Button früh losgelassen)
+            if (_jumpCutRequested && _verticalVelocity > 0f)
+            {
+                _jumpCutRequested = false;
+                _verticalVelocity *= JumpModule.DefaultJumpCutMultiplier;
+            }
+
+            // 3. Vertical Reset (Ceiling Hit etc.)
+            if (_resetVerticalRequested)
+            {
+                _resetVerticalRequested = false;
+                _verticalVelocity = 0f;
+            }
+
+            // 4. Gravity via GravityModule (Single Source of Truth)
+            _verticalVelocity = _gravityModule.CalculateVerticalVelocity(
+                _verticalVelocity,
+                _motor.GroundingStatus.IsStableOnGround,
+                _config.Gravity,
+                _config.MaxFallSpeed,
+                deltaTime);
+
+            float vertical = _verticalVelocity;
+
+            // ForceUnground wenn aufwärts (z.B. nach Jump-Impulse)
+            if (vertical > 0f)
             {
                 _motor.ForceUnground(0.1f);
             }
 
-            // Finale Velocity setzen
-            currentVelocity = _horizontalVelocity + Vector3.up * _verticalVelocity;
+            // DEBUG: Landing-Diagnose (5 Frames nach Landung loggen)
+            if (_motor.JustLanded) _debugLandingFrames = 5;
+            if (_debugLandingFrames > 0)
+            {
+                _debugLandingFrames--;
+                Debug.Log($"[Locomotion] grounded={_motor.GroundingStatus.IsStableOnGround} justLanded={_motor.JustLanded} " +
+                    $"baseVel={currentVelocity:F2} inputH={currentHorizontal.magnitude:F2} " +
+                    $"target={targetHorizontal.magnitude:F2} newH={newHorizontal.magnitude:F2} " +
+                    $"speedMod={_currentInput.SpeedModifier:F2} vert={vertical:F2} " +
+                    $"stepDet={_currentInput.StepDetectionEnabled}");
+            }
+
+            // === FINALE VELOCITY ===
+            if (_motor.GroundingStatus.IsStableOnGround && vertical <= 0 && newHorizontal.sqrMagnitude > 0.01f)
+            {
+                // Am Boden: Velocity auf Slope-Oberfläche reorientieren
+                currentVelocity = _motor.GetDirectionTangentToSurface(
+                    newHorizontal, _motor.GroundingStatus.GroundNormal) * newHorizontal.magnitude;
+            }
+            else
+            {
+                // In der Luft oder beim Springen: Flache horizontale + vertikale Velocity
+                currentVelocity = newHorizontal + Vector3.up * vertical;
+            }
         }
 
         public void PostGroundingUpdate(float deltaTime)
         {
             // Nach Ground Probing - hier haben wir den aktuellen Ground-State
             UpdateCachedGroundInfo();
+<<<<<<< HEAD
+            // Ground Snapping wird in UpdateVelocity gehandhabt
+=======
 
             // Ground Snapping via GravityModule
             _verticalVelocity = _gravityModule.ApplyGroundSnapping(
                 _verticalVelocity,
                 _motor.GroundingStatus.IsStableOnGround);
+>>>>>>> origin/main
         }
 
         public void AfterCharacterUpdate(float deltaTime)
         {
-            // Nach dem Update
+            // Kein Wall-Sync nötig: UpdateVelocity liest direkt aus currentVelocity (= BaseVelocity),
+            // die bereits die Kollisions-Auflösung vom Motor enthält.
         }
 
         public bool IsColliderValidForCollisions(Collider coll)
@@ -208,7 +332,8 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.Locomotion
 
         public void OnMovementHit(Collider hitCollider, Vector3 hitNormal, Vector3 hitPoint, ref HitStabilityReport hitStabilityReport)
         {
-            // Movement hit callback
+            // Kollisions-Auflösung wird vom Motor in InternalCharacterMove gehandhabt
+            // und fließt über currentVelocity ins nächste UpdateVelocity zurück.
         }
 
         public void ProcessHitStabilityReport(Collider hitCollider, Vector3 hitNormal, Vector3 hitPoint, Vector3 atCharacterPosition, Quaternion atCharacterRotation, ref HitStabilityReport hitStabilityReport)
@@ -235,13 +360,8 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.Locomotion
 
         #region Utility
 
-        public Vector3 HorizontalVelocity => _horizontalVelocity;
+        public Vector3 HorizontalVelocity => _lastComputedHorizontal;
         public float VerticalVelocity => _verticalVelocity;
-
-        public void SetVerticalVelocity(float velocity)
-        {
-            _verticalVelocity = velocity;
-        }
 
         public void SetRotation(float yaw)
         {
@@ -252,7 +372,7 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.Locomotion
 
         public void StopMovement()
         {
-            _horizontalVelocity = Vector3.zero;
+            _lastComputedHorizontal = Vector3.zero;
             _verticalVelocity = 0f;
             _motor.BaseVelocity = Vector3.zero;
         }

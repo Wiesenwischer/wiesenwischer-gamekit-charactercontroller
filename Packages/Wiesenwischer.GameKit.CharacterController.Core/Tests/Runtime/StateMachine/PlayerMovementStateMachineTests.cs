@@ -81,13 +81,29 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.Tests.StateMachine
         }
 
         [Test]
+        public void ResetTemporaryData_ClearsIntentFlags()
+        {
+            // Arrange
+            _reusableData.JumpRequested = true;
+            _reusableData.JumpCutRequested = true;
+            _reusableData.ResetVerticalRequested = true;
+
+            // Act
+            _reusableData.ResetTemporaryData();
+
+            // Assert
+            Assert.IsFalse(_reusableData.JumpRequested);
+            Assert.IsFalse(_reusableData.JumpCutRequested);
+            Assert.IsFalse(_reusableData.ResetVerticalRequested);
+        }
+
+        [Test]
         public void ResetMovementData_ClearsVelocitiesAndModifiers()
         {
             // Arrange
             _reusableData.VerticalVelocity = 10f;
             _reusableData.HorizontalVelocity = Vector3.one;
             _reusableData.MovementSpeedModifier = 2f;
-            _reusableData.MovementDecelerationForce = 3f;
 
             // Act
             _reusableData.ResetMovementData();
@@ -96,7 +112,6 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.Tests.StateMachine
             Assert.AreEqual(0f, _reusableData.VerticalVelocity);
             Assert.AreEqual(Vector3.zero, _reusableData.HorizontalVelocity);
             Assert.AreEqual(1f, _reusableData.MovementSpeedModifier);
-            Assert.AreEqual(1f, _reusableData.MovementDecelerationForce);
         }
 
         #endregion
@@ -171,7 +186,10 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.Tests.StateMachine
         public float RunSpeed { get; set; } = 10f;
         public float Acceleration { get; set; } = 10f;
         public float Deceleration { get; set; } = 10f;
+        public float SprintMultiplier { get; set; } = 1.5f;
         public float AirControl { get; set; } = 0.3f;
+        public float AirDrag { get; set; } = 0.8f;
+        public float MinFallDistance { get; set; } = 0.5f;
         public float Gravity { get; set; } = 20f;
         public float MaxFallSpeed { get; set; } = 50f;
         public float JumpHeight { get; set; } = 2f;

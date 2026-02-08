@@ -24,10 +24,20 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.Locomotion
         [Tooltip("Verzögerung beim Stoppen der Bewegung (m/s²)")]
         [SerializeField] private float _deceleration = 15.0f;
 
+        [Tooltip("Sprint-Multiplikator relativ zu Run (z.B. 1.5 = 50% schneller als Run)")]
+        [SerializeField] private float _sprintMultiplier = 1.5f;
+
         [Header("Air Movement")]
-        [Tooltip("Kontrolle in der Luft (0 = keine, 1 = volle Kontrolle)")]
+        [Tooltip("Steuerbarkeit in der Luft (0 = keine Steuerung, 1 = volle Kontrolle). Beeinflusst wie stark der Spieler die Richtung in der Luft ändern kann.")]
         [Range(0f, 1f)]
         [SerializeField] private float _airControl = 0.3f;
+
+        [Tooltip("Wie schnell horizontales Momentum in der Luft verloren geht (0 = kein Drag/volles Momentum, 1 = Abbremsung wie am Boden)")]
+        [Range(0f, 1f)]
+        [SerializeField] private float _airDrag = 0.8f;
+
+        [Tooltip("Minimale Falldistanz in Metern, ab der der Character als fallend erkannt wird. Drops darunter werden ignoriert (Treppen, kleine Kanten).")]
+        [SerializeField] private float _minFallDistance = 0.5f;
 
         [Tooltip("Gravitationsbeschleunigung (m/s²)")]
         [SerializeField] private float _gravity = 20.0f;
@@ -118,7 +128,10 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.Locomotion
         public float RunSpeed => _runSpeed;
         public float Acceleration => _acceleration;
         public float Deceleration => _deceleration;
+        public float SprintMultiplier => _sprintMultiplier;
         public float AirControl => _airControl;
+        public float AirDrag => _airDrag;
+        public float MinFallDistance => _minFallDistance;
         public float Gravity => _gravity;
         public float MaxFallSpeed => _maxFallSpeed;
         public float JumpHeight => _jumpHeight;

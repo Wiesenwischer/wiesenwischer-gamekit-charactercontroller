@@ -4,70 +4,41 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.StateMachine.States
 {
     /// <summary>
     /// State während der Character fällt.
-    /// Einfach: Wenn grounded → Landing/Jump.
+    /// Wenn grounded → SoftLanding oder HardLanding basierend auf Fallhöhe.
     /// </summary>
     public class PlayerFallingState : PlayerAirborneState
     {
         public override string StateName => "Falling";
 
-        private bool _jumpBuffered;
-        private float _jumpBufferTimer;
-
         public PlayerFallingState(PlayerMovementStateMachine stateMachine) : base(stateMachine)
         {
-        }
-
-        protected override void OnEnter()
-        {
-            base.OnEnter();
-            _jumpBuffered = false;
-            _jumpBufferTimer = 0f;
-        }
-
-        protected override void OnHandleInput()
-        {
-            // Jump Buffer: Speichere Jump-Input
-            if (ReusableData.JumpPressed)
-            {
-                _jumpBuffered = true;
-                _jumpBufferTimer = Config.JumpBufferTime;
-            }
         }
 
         protected override void OnUpdate()
         {
             base.OnUpdate();
 
-            // Jump Buffer Timer
-            if (_jumpBuffered)
-            {
-                _jumpBufferTimer -= Time.deltaTime;
-                if (_jumpBufferTimer <= 0f)
-                {
-                    _jumpBuffered = false;
-                }
-            }
-
             // Berechne Fallhöhe
             float fallDistance = ReusableData.LastGroundedY - Player.transform.position.y;
 
-            // Gelandet ODER kleiner Drop (Treppen)?
-            // Bei kleinen Drops (< MaxStepHeight) behandeln wir das als "noch geerdet"
-            bool shouldLand = ReusableData.IsGrounded || (fallDistance < Config.MaxStepHeight && fallDistance >= 0f);
-
-            if (shouldLand)
+            // Landing: Motor ist Single Source of Truth für Ground-State
+            if (ReusableData.IsGrounded)
             {
-                ReusableData.LandingVelocity = ReusableData.VerticalVelocity;
+                // Landing-Klassifikation über Fall-Distanz statt akkumulierte VerticalVelocity.
+                // VerticalVelocity ist durch Erkennungs-Latenz aufgebläht (Gravity wird 1-2 Ticks
+                // nach tatsächlichem Bodenkontakt weiter angewendet).
+                // Umrechnung in äquivalente Geschwindigkeit: v = sqrt(2*g*d)
+                float effectiveFallDistance = Mathf.Max(0f, fallDistance);
+                float landingSpeed = Mathf.Sqrt(2f * Config.Gravity * effectiveFallDistance);
+                ReusableData.LandingVelocity = -landingSpeed;
 
-                if (_jumpBuffered)
+                if (landingSpeed >= Config.HardLandingThreshold)
                 {
-                    ReusableData.JumpWasReleased = true;
-                    ReusableData.JumpPressed = true;
-                    ChangeState(stateMachine.JumpingState);
+                    ChangeState(stateMachine.HardLandingState);
                 }
                 else
                 {
-                    ChangeState(stateMachine.LandingState);
+                    ChangeState(stateMachine.SoftLandingState);
                 }
             }
         }

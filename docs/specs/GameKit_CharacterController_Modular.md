@@ -4,6 +4,13 @@ Dieses Dokument beschreibt die modulare Aufteilung des Character Controllers in 
 
 ---
 
+## 🔗 Verwandte Spezifikationen
+
+- [AAA Action Combat & Character Architecture](AAA_Action_Combat_Character_Architecture.md) – Architektur-Philosophie für Character-Layering
+- [Master Architecture Overview](Wiesenwischer_Gamekit_Master_Architecture.md) – Einordnung in die System-Architektur (Player Scene)
+
+---
+
 ## 🧱 Paketübersicht
 
 | Paketname | Inhalt | Zweck |
