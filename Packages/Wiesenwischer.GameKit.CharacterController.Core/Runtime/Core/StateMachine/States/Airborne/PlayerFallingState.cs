@@ -21,11 +21,8 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.StateMachine.States
             // Berechne Fallhöhe
             float fallDistance = ReusableData.LastGroundedY - Player.transform.position.y;
 
-            // Gelandet ODER kleiner Drop (Treppen)?
-            // Bei kleinen Drops (< MaxStepHeight) behandeln wir das als "noch geerdet"
-            bool shouldLand = ReusableData.IsGrounded || (fallDistance < Config.MaxStepHeight && fallDistance >= 0f);
-
-            if (shouldLand)
+            // Landing: Motor ist Single Source of Truth für Ground-State
+            if (ReusableData.IsGrounded)
             {
                 // Landing-Klassifikation über Fall-Distanz statt akkumulierte VerticalVelocity.
                 // VerticalVelocity ist durch Erkennungs-Latenz aufgebläht (Gravity wird 1-2 Ticks
