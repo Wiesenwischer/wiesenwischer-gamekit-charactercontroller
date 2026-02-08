@@ -61,9 +61,7 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.Tests
             Assert.AreEqual(Vector2.zero, input.MoveDirection);
             Assert.AreEqual(Vector3.forward, input.LookDirection);
             Assert.AreEqual(1f, input.SpeedModifier);
-            Assert.IsFalse(input.Jump);
-            Assert.IsFalse(input.JumpCut);
-            Assert.IsFalse(input.ResetVerticalVelocity);
+            Assert.IsFalse(input.StepDetectionEnabled);
         }
 
         [Test]

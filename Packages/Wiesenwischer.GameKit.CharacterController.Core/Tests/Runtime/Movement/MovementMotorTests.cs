@@ -273,9 +273,7 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.Tests.Locomotion
             Assert.AreEqual(Vector2.zero, input.MoveDirection);
             Assert.AreEqual(Vector3.forward, input.LookDirection);
             Assert.AreEqual(1f, input.SpeedModifier);
-            Assert.IsFalse(input.Jump);
-            Assert.IsFalse(input.JumpCut);
-            Assert.IsFalse(input.ResetVerticalVelocity);
+            Assert.IsFalse(input.StepDetectionEnabled);
         }
 
         [Test]
@@ -287,16 +285,14 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.Tests.Locomotion
                 MoveDirection = new Vector2(0.5f, 0.5f),
                 LookDirection = Vector3.right,
                 SpeedModifier = 2f,
-                Jump = true,
-                JumpCut = false,
-                ResetVerticalVelocity = false
+                StepDetectionEnabled = true
             };
 
             // Assert
             Assert.AreEqual(new Vector2(0.5f, 0.5f), input.MoveDirection);
             Assert.AreEqual(Vector3.right, input.LookDirection);
             Assert.AreEqual(2f, input.SpeedModifier);
-            Assert.IsTrue(input.Jump);
+            Assert.IsTrue(input.StepDetectionEnabled);
         }
 
         #endregion

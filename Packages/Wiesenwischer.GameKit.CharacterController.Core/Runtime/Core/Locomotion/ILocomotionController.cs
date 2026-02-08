@@ -56,12 +56,32 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.Locomotion
         /// </summary>
         /// <param name="velocity">Die anzuwendende Geschwindigkeit.</param>
         void ApplyVelocity(Vector3 velocity);
+
+        #region Movement Events
+
+        /// <summary>
+        /// Fordert einen Sprung an. Wird intern akkumuliert bis der Motor konsumiert.
+        /// </summary>
+        void RequestJump();
+
+        /// <summary>
+        /// Fordert einen Variable Jump Cut an (Button früh losgelassen).
+        /// Reduziert aufwärts-Velocity wenn noch im Aufstieg.
+        /// </summary>
+        void RequestJumpCut();
+
+        /// <summary>
+        /// Setzt die vertikale Velocity auf 0 (z.B. bei Ceiling Hit).
+        /// </summary>
+        void RequestResetVertical();
+
+        #endregion
     }
 
     /// <summary>
-    /// Struct für Locomotion Input.
-    /// Enthält Intent-basierte Eingaben für die Bewegung.
-    /// States setzen Intent (Modifier, Impulse, Flags), CharacterLocomotion führt Physik aus.
+    /// Struct für kontinuierlichen Locomotion Input.
+    /// Enthält nur Daten die jeden Frame aktualisiert werden (latest-value-wins).
+    /// Events (Jump, JumpCut etc.) gehen über separate Request-Methoden auf ILocomotionController.
     /// </summary>
     public struct LocomotionInput
     {
@@ -87,29 +107,6 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.Locomotion
         /// Wird mit WalkSpeed multipliziert (z.B. 0 für Idle, 1 für Walk, 2 für Run).
         /// </summary>
         public float SpeedModifier;
-
-        #region Vertical Intent
-
-        /// <summary>
-        /// Sprung-Intent. Wenn true, wird ein Jump-Impulse angewendet.
-        /// One-Shot: Wird nach Konsum zurückgesetzt.
-        /// </summary>
-        public bool Jump;
-
-        /// <summary>
-        /// Variable Jump Cut. Wenn true, wird die aufwärts-Velocity reduziert.
-        /// Wird gesetzt wenn der Jump-Button früh losgelassen wird.
-        /// One-Shot: Wird nach Konsum zurückgesetzt.
-        /// </summary>
-        public bool JumpCut;
-
-        /// <summary>
-        /// Setzt die vertikale Velocity auf 0 (z.B. bei Ceiling Hit).
-        /// One-Shot: Wird nach Konsum zurückgesetzt.
-        /// </summary>
-        public bool ResetVerticalVelocity;
-
-        #endregion
 
         /// <summary>
         /// Erstellt einen leeren Locomotion Input.

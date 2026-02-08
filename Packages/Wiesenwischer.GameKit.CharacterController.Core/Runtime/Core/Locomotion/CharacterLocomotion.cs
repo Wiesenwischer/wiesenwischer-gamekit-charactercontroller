@@ -20,10 +20,13 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.Locomotion
         private readonly GroundDetectionModule _groundDetectionModule;
         private readonly GravityModule _gravityModule;
 
-        // Input für den aktuellen Frame.
-        // One-Shot Intent-Flags (Jump, JumpCut, ResetVerticalVelocity) werden per OR
-        // akkumuliert und erst in UpdateVelocity() konsumiert/gecleart.
+        // Kontinuierlicher Input (latest-value-wins, Overwrite = korrekt)
         private LocomotionInput _currentInput;
+
+        // Event-Flags (intern akkumuliert, konsumiert in UpdateVelocity)
+        private bool _jumpRequested;
+        private bool _jumpCutRequested;
+        private bool _resetVerticalRequested;
 
         // Cached horizontal velocity (aus UpdateVelocity, für Rotation + Debug)
         private Vector3 _lastComputedHorizontal;
@@ -99,14 +102,8 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.Locomotion
 
         public void Simulate(LocomotionInput input, float deltaTime)
         {
-            // One-Shot Intent-Flags akkumulieren bevor der Rest überschrieben wird.
-            // TickSystem (60Hz) kann schneller feuern als Motor FixedUpdate (~50Hz).
-            // Ohne OR-Akkumulation geht z.B. Jump=true verloren wenn der nächste
-            // Simulate-Aufruf Jump=false setzt bevor der Motor UpdateVelocity() aufruft.
-            input.Jump |= _currentInput.Jump;
-            input.JumpCut |= _currentInput.JumpCut;
-            input.ResetVerticalVelocity |= _currentInput.ResetVerticalVelocity;
-
+            // Nur kontinuierlicher Input - Overwrite ist korrekt (latest-value-wins).
+            // Events (Jump etc.) gehen über RequestJump() und werden intern akkumuliert.
             _currentInput = input;
         }
 
@@ -123,6 +120,10 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.Locomotion
             _verticalVelocity = velocity.y;
             _motor.BaseVelocity = velocity;
         }
+
+        public void RequestJump() => _jumpRequested = true;
+        public void RequestJumpCut() => _jumpCutRequested = true;
+        public void RequestResetVertical() => _resetVerticalRequested = true;
 
         #endregion
 
@@ -202,28 +203,26 @@ namespace Wiesenwischer.GameKit.CharacterController.Core.Locomotion
             // States setzen Intent (Jump, JumpCut, ResetVertical), hier wird Physik berechnet.
 
             // 1. Jump-Impulse verarbeiten
-            if (_currentInput.Jump)
+            if (_jumpRequested)
             {
+                _jumpRequested = false;
                 _verticalVelocity = GetJumpVelocity();
                 _motor.ForceUnground(0.1f);
             }
 
             // 2. Variable Jump Cut (Button früh losgelassen)
-            if (_currentInput.JumpCut && _verticalVelocity > 0f)
+            if (_jumpCutRequested && _verticalVelocity > 0f)
             {
+                _jumpCutRequested = false;
                 _verticalVelocity *= JumpModule.DefaultJumpCutMultiplier;
             }
 
             // 3. Vertical Reset (Ceiling Hit etc.)
-            if (_currentInput.ResetVerticalVelocity)
+            if (_resetVerticalRequested)
             {
+                _resetVerticalRequested = false;
                 _verticalVelocity = 0f;
             }
-
-            // One-Shot Flags konsumieren (wurden per OR akkumuliert in Simulate)
-            _currentInput.Jump = false;
-            _currentInput.JumpCut = false;
-            _currentInput.ResetVerticalVelocity = false;
 
             // 4. Gravity via GravityModule (Single Source of Truth)
             _verticalVelocity = _gravityModule.CalculateVerticalVelocity(
