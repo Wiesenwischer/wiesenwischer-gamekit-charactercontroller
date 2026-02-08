@@ -58,6 +58,7 @@ Dieser Plan beschreibt die schrittweise Implementierung des GameKit Character Co
 
 **Relevante Spezifikationen:**
 - [Animationskonzept LayeredAbilities](../specs/Animationskonzept_LayeredAbilities.md)
+- [AAA Action Combat & Character Architecture](../specs/AAA_Action_Combat_Character_Architecture.md)
 
 **Schritte:**
 - [ ] [2.1 Avatar Masks erstellen](phase-2-animator-setup/2.1-avatar-masks.md)
@@ -92,6 +93,7 @@ Dieser Plan beschreibt die schrittweise Implementierung des GameKit Character Co
 **Relevante Spezifikationen:**
 - [Modulare Fertigkeiten Controller v2](../specs/ModularFertigkeitenController_Spezifikation_v2.md)
 - [Skills & Action Combat](../specs/GameKit_Skills_ActionCombat.md)
+- [AAA Action Combat & Character Architecture](../specs/AAA_Action_Combat_Character_Architecture.md)
 
 **Schritte:**
 - [ ] 4.1 IAbility Interface
@@ -110,6 +112,7 @@ Dieser Plan beschreibt die schrittweise Implementierung des GameKit Character Co
 - [CSP Spezifikation](../specs/CSP_Spezifikation.md)
 - [GameKit MMO Basics](../specs/GameKit_MMO_Basics.md)
 - [GameKit InputSystem Spezifikation](../specs/GameKit_InputSystem_Spezifikation.md)
+- [Master Architecture Overview](../specs/Wiesenwischer_Gamekit_Master_Architecture.md)
 
 **Schritte:**
 - [ ] 5.1 FishNet einbinden
@@ -162,6 +165,7 @@ Dieser Plan beschreibt die schrittweise Implementierung des GameKit Character Co
 - [Skills & Action Combat](../specs/GameKit_Skills_ActionCombat.md)
 - [Modulare Fertigkeiten Controller v2](../specs/ModularFertigkeitenController_Spezifikation_v2.md)
 - [Animationskonzept LayeredAbilities](../specs/Animationskonzept_LayeredAbilities.md)
+- [AAA Action Combat & Character Architecture](../specs/AAA_Action_Combat_Character_Architecture.md)
 
 **Schritte:**
 - [ ] 8.1 Combat Package Struktur
@@ -180,6 +184,7 @@ Dieser Plan beschreibt die schrittweise Implementierung des GameKit Character Co
 **Relevante Spezifikationen:**
 - [Animationskonzept LayeredAbilities](../specs/Animationskonzept_LayeredAbilities.md)
 - [GameKit CharacterController Modular](../specs/GameKit_CharacterController_Modular.md)
+- [AAA Action Combat & Character Architecture](../specs/AAA_Action_Combat_Character_Architecture.md)
 
 **Schritte:**
 - [ ] 9.1 Movement Controller Abstraktion

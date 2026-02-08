@@ -4,6 +4,14 @@ Diese überarbeitete Version basiert weiterhin auf den mechanischen Grundlagen v
 
 ---
 
+## 🔗 Verwandte Spezifikationen
+
+- [AAA Action Combat & Character Architecture](AAA_Action_Combat_Character_Architecture.md) – Intent System, Animation-Driven Windows (Hit/Cancel/Buffer), Priority System, Motion Warping
+- [Modulare Fertigkeiten Controller v2](ModularFertigkeitenController_Spezifikation_v2.md) – IAbility Interface, AbilityBar, PlayerContext
+- [Animationskonzept LayeredAbilities](Animationskonzept_LayeredAbilities.md) – Layer-basierte Animator-Struktur für Ability-Animationen
+
+---
+
 ## ⚔️ Ziel: Action-fähiges, regelbasiertes Skill-System
 
 ### Unterstützt:

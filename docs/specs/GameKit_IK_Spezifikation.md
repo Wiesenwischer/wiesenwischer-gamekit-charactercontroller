@@ -6,6 +6,13 @@ Diese Spezifikation beschreibt, wie Inverse Kinematics (IK) systematisch in das 
 
 ---
 
+## 🔗 Verwandte Spezifikationen
+
+- [AAA Action Combat & Character Architecture](AAA_Action_Combat_Character_Architecture.md) – Animation-Layer Kontext (IK als Teil des Layer-Systems)
+- [Animationskonzept LayeredAbilities](Animationskonzept_LayeredAbilities.md) – Layer 2/3 (Facial/LookAt) für IK-Integration
+
+---
+
 ## 🎯 Ziele
 
 - IK modular aktivierbar für verschiedene Controller (z. B. Reiten, Fahrzeug, Normal)

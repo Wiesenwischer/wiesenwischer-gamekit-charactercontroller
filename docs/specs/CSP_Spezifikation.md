@@ -6,6 +6,13 @@ Diese Spezifikation beschreibt die grundlegende Architektur und Umsetzung von Cl
 
 ---
 
+## 🔗 Verwandte Spezifikationen
+
+- [Master Architecture Overview](Wiesenwischer_Gamekit_Master_Architecture.md) – Player-/Scene-Architektur und Netzwerk-Kontext
+- [GameKit MMO Basics](GameKit_MMO_Basics.md) – Server Authority, Netzwerk-Grundprinzipien
+
+---
+
 ## 🎯 Ziel
 
 Ein Movement-System, das:

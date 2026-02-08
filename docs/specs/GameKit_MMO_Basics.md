@@ -5,6 +5,14 @@
 
 ---
 
+## 🔗 Verwandte Spezifikationen
+
+- [Master Architecture Overview](Wiesenwischer_Gamekit_Master_Architecture.md) – System-Level MMO-Architektur (CoreRoot, Multi-Scene, Player Scene)
+- [World Architecture Master](Wiesenwischer_Gamekit_World_Architecture_MASTER.md) – World/Zone Simulation, Chunk Streaming, Claims im MMO-Kontext
+- [CSP Spezifikation](CSP_Spezifikation.md) – Client-Side Prediction Details
+
+---
+
 ## ✅ Grundprinzipien für ein MMO-fähiges Framework
 
 ### 1. Server vs. Client klar trennen

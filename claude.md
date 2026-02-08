@@ -29,6 +29,10 @@ Das Ziel ist die Entwicklung eines **modularen, MMO-fähigen Unity GameKit Frame
 | `BuildSystem_*.md` | Konzeptionen für ein modulares Bausystem |
 | `UnityRepo_CompleteSetup.md` | Repository-Setup inkl. Git, LFS, Release, Versionierung |
 | `GameKit_MMO_Basics.md` | Wichtige MMO-Grundlagen und Design-Prinzipien |
+| `AAA_Action_Combat_Character_Architecture.md` | Character-Intent-State-Architektur, Action Combat, Animation Layers |
+| `Wiesenwischer_Gamekit_Master_Architecture.md` | System-Architektur (CoreRoot, Multi-Scene, Streaming, Player) |
+| `Wiesenwischer_Gamekit_World_Architecture.md` | World-Architektur (Terrain, Weather, Claims, Zones, WorldState) |
+| `Wiesenwischer_Gamekit_World_Architecture_MASTER.md` | Erweiterte World-Architektur mit Adapters, Commands, Package-Grenzen |
 
 ---
 

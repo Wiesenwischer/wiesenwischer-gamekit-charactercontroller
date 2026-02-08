@@ -4,6 +4,15 @@
 
 Diese Spezifikation beschreibt den Aufbau eines modularen Charakter-Controllers in Unity, der sowohl Bewegung als auch ein flexibles Fähigkeitensystem unterstützt. Das System ist ausgelegt für komplexe Spielmechaniken wie Reiten, Nahkampf, Zauberei, Luftbewegung und kombinierbare Kampfstile. 
 
+## 🔗 Verwandte Spezifikationen
+
+- [AAA Action Combat & Character Architecture](AAA_Action_Combat_Character_Architecture.md) – Übergeordnete Architektur: Intent → State → Ability → Motor → Animation
+- [Master Architecture Overview](Wiesenwischer_Gamekit_Master_Architecture.md) – System-Level Einordnung (Player Scene, CoreRoot)
+- [Animationskonzept LayeredAbilities](Animationskonzept_LayeredAbilities.md) – Wie Abilities animiert werden (Layer 1, UpperBody Mask)
+- [Skills & Action Combat](GameKit_Skills_ActionCombat.md) – Damage, Targeting, Skill Execution Details
+
+---
+
 ## 🧱 Architekturüberblick
 
 Die Architektur folgt den Prinzipien:
